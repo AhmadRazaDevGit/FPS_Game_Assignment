@@ -13,6 +13,9 @@ public class KeyboardMouseInput : MonoBehaviour, IInputProvider
     [Tooltip("Key to press to jump (checked with Input.GetKeyDown).")]
     [SerializeField] private KeyCode jumpKey = KeyCode.Space;
 
+    [Tooltip("Key to press to crouch (checked with Input.GetKey).")]
+    [SerializeField] private KeyCode crouchKey = KeyCode.LeftControl;
+
     private PlayerInputState _state;
 
     public PlayerInputState GetInput()
@@ -20,7 +23,11 @@ public class KeyboardMouseInput : MonoBehaviour, IInputProvider
         // No memory allocation; use existing struct
         _state.Move.x = Input.GetAxisRaw(horizontalAxis);
         _state.Move.y = Input.GetAxisRaw(verticalAxis);
+        // edge-detected jump
         _state.Jump = Input.GetKeyDown(jumpKey);
+
+        // Crouch - held
+        _state.Crouch = Input.GetKey(crouchKey);
         return _state;
     }
 }

@@ -21,6 +21,18 @@ public class MovementConfig : ScriptableObject
     [Tooltip("Jump impulse (optional)")]
     public float jumpForce = 6f;
 
+    [Header("Crouch")]
+    [Tooltip("Height multiplier applied when crouching (0..1)")]
+    [Range(0.3f, 1f)]
+    public float crouchHeightMultiplier = 0.5f;
+
+    [Tooltip("Movement speed multiplier while crouching (0..1)")]
+    [Range(0.1f, 1f)]
+    public float crouchSpeedMultiplier = 0.5f;
+
+    [Tooltip("How fast to interpolate height & camera when crouching")]
+    public float crouchTransitionSpeed = 8f;
+
     [Header("Misc")]
     [Tooltip("How much control player has while in air (0..1)")]
     [Range(0f, 1f)]
