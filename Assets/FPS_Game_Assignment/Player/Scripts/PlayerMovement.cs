@@ -3,13 +3,16 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
 {
+    #region Config & Dependencies
     [Header("Config (data-only)")]
     [SerializeField] private MovementConfig movementConfig;
 
     [Header("Dependencies")]
     [Tooltip("Component implementing IInputProvider. Can be KeyboardMouseInput or MobileInputProvider")]
     [SerializeField] private MonoBehaviour inputProviderComponent;
+    #endregion
 
+    #region Crouch / Camera
     [Header("Crouch/Camera")]
     [Tooltip("Camera will be moved down/up with crouch")]
     [SerializeField] private Transform playerCamera;
@@ -19,20 +22,24 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField, Tooltip("CharacterController radius override (0 to use existing)")]
     private float controllerRadius = 0f;
+    #endregion
 
+    #region Settings
     [Header("Settings")]
     [SerializeField, Tooltip("Height from player origin to sphere used to check grounding")]
     private float groundCheckDistance = 0.3f;
+    #endregion
 
+    #region Internal state
     private IInputProvider _inputProvider;
     private CharacterController _controller;
     private Transform _transform;
 
-    // Internal state
+    // movement state
     private Vector3 _horizontalVelocity;
     private bool _isGrounded;
     private float _verticalSpeed;
-    private bool _wasGroundedLastFrame; // Track previous grounded state for jump buffering
+    private bool _wasGroundedLastFrame; // previous frame grounding for jump buffering
 
     // crouch smoothing state
     private float _targetHeight;
@@ -42,23 +49,52 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 _cameraLocalPosStanding;
     private Vector3 _cameraLocalPosCrouched;
 
-    // baseline preserved from Awake (immutable baseline)
+    // immutable baseline
     private Vector3 _originalControllerCenter;
 
-    // small threshold before applying changes to avoid visual jitter
+    // thresholds / debug tracking
     private const float HeightApplyEpsilon = 0.01f;
     private const float CenterApplyEpsilon = 0.01f;
-
-    // debug: track last applied values so we only log when a real change happens
     private float _lastAppliedHeight;
     private Vector3 _lastAppliedCenter;
+    #endregion
 
+    #region Unity lifecycle
     private void Awake()
+    {
+        InitializeComponents();
+        InitializeHeightsAndCamera();
+        ApplyInitialControllerBaseline();
+    }
+
+    private void Update()
+    {
+        // Read input & preserve grounding for buffering logic
+        var input = ProcessInput();
+        _wasGroundedLastFrame = _isGrounded;
+
+        UpdateGround();
+
+        UpdateHorizontalMovement(input);
+
+        TryJump(input);
+
+        ApplyGravity();
+
+        UpdateCrouch(input);
+
+        SetCameraPos(input);
+
+        PerformMove();
+    }
+    #endregion
+
+    #region Initialization helpers
+    private void InitializeComponents()
     {
         _controller = GetComponent<CharacterController>();
         _transform = transform;
 
-        // warn about duplicate colliders (common source of visual offset)
         if (GetComponent<CapsuleCollider>() != null)
         {
             Debug.LogWarning("[PlayerMovement] Found a CapsuleCollider on the same GameObject as a CharacterController. Remove CapsuleCollider when using CharacterController.", this);
@@ -70,23 +106,23 @@ public class PlayerMovement : MonoBehaviour
         _inputProvider = inputProviderComponent as IInputProvider;
         if (_inputProvider == null) Debug.LogError($"[{nameof(PlayerMovement)}] Input provider does not implement IInputProvider.", this);
 
-        // ensure consistent baseline height/center
+        if (controllerRadius > 0f) _controller.radius = controllerRadius;
+    }
+
+    private void InitializeHeightsAndCamera()
+    {
         if (standingHeight <= 0f) standingHeight = _controller.height;
+
+        // init heights
         _currentHeight = standingHeight;
         _targetHeight = standingHeight;
 
-        // preserve baseline center and force controller center to match standingHeight/2
+        // preserve original center baseline (immutable)
         _originalControllerCenter = _controller.center;
         Vector3 forcedCenter = new Vector3(_originalControllerCenter.x, standingHeight / 2f, _originalControllerCenter.z);
-
-        // apply baseline to controller immediately to avoid drift
-        _controller.height = standingHeight;
-        _controller.center = forcedCenter;
-
         _currentCenter = forcedCenter;
         _targetCenter = forcedCenter;
 
-        // camera targets (safe-guard movementConfig exists)
         if (playerCamera != null && movementConfig != null)
         {
             _cameraLocalPosStanding = playerCamera.localPosition;
@@ -95,23 +131,28 @@ public class PlayerMovement : MonoBehaviour
                                                   _cameraLocalPosStanding.z);
         }
 
-        if (controllerRadius > 0f) _controller.radius = controllerRadius;
-
-        // init last-applied trackers
         _lastAppliedHeight = _controller.height;
         _lastAppliedCenter = _controller.center;
     }
 
-    private void Update()
+    private void ApplyInitialControllerBaseline()
     {
-        var input = _inputProvider.GetInput();
+        // Apply baseline immediately to avoid drift from other code
+        _controller.height = standingHeight;
+        _controller.center = _currentCenter;
+    }
+    #endregion
 
-        // Store previous grounded state for jump buffering
-        _wasGroundedLastFrame = _isGrounded;
-        
-        GroundCheck();
+    #region Input
+    private PlayerInputState ProcessInput()
+    {
+        return _inputProvider.GetInput();
+    }
+    #endregion
 
-        // movement input
+    #region Movement: horizontal
+    private void UpdateHorizontalMovement(PlayerInputState input)
+    {
         Vector3 desiredLocal = new Vector3(input.Move.x, 0f, input.Move.y);
         desiredLocal = Vector3.ClampMagnitude(desiredLocal, 1f);
 
@@ -124,13 +165,18 @@ public class PlayerMovement : MonoBehaviour
 
         float acceleration = _isGrounded ? movementConfig.groundAcceleration : movementConfig.airAcceleration;
         _horizontalVelocity = Vector3.MoveTowards(_horizontalVelocity, new Vector3(desiredWorld.x, 0, desiredWorld.z), acceleration * Time.deltaTime);
+
         if (!_isGrounded)
         {
             _horizontalVelocity = Vector3.Lerp(_horizontalVelocity, new Vector3(desiredWorld.x, 0, desiredWorld.z), movementConfig.airControl * Time.deltaTime);
         }
+    }
+    #endregion
 
-        // Jump (edge) � do not allow jump while crouched
-        // Allow jump if grounded OR if we were grounded recently (jump buffering)
+    #region Jump & gravity
+    private void TryJump(PlayerInputState input)
+    {
+        // Allow jump if grounded OR if we were grounded last frame (simple buffer)
         bool canJump = (_isGrounded || _wasGroundedLastFrame) && !input.Crouch;
         if (canJump && input.Jump)
         {
@@ -142,31 +188,34 @@ public class PlayerMovement : MonoBehaviour
         {
             Debug.Log($"[PlayerMovement] Jump input received but cannot jump. Grounded: {_isGrounded}, WasGrounded: {_wasGroundedLastFrame}, Crouch: {input.Crouch}", this);
         }
+    }
 
-        // Apply gravity and handle grounded state
+    private void ApplyGravity()
+    {
         if (_isGrounded)
         {
-            // Only apply downward force if we're actually landing (slow downward movement)
-            // This prevents the slowdown when falling
-            if (_verticalSpeed < 0 && _verticalSpeed > -2f) 
+            // only apply slight downward force when landing to keep controller grounded
+            if (_verticalSpeed < 0 && _verticalSpeed > -2f)
             {
-                _verticalSpeed = -0.5f; // Only when actually landing
+                _verticalSpeed = -0.5f;
             }
         }
         else
         {
-            // Apply gravity when in air - no interference with falling
             _verticalSpeed -= movementConfig.gravity * Time.deltaTime;
         }
+    }
+    #endregion
 
-        // ---- CROUCH: compute targets using immutable baseline (no drift) ----
+    #region Crouch (height & center)
+    private void UpdateCrouch(PlayerInputState input)
+    {
         float desiredCrouchHeight = movementConfig != null ? movementConfig.crouchHeightMultiplier * standingHeight : standingHeight * 0.5f;
         _targetHeight = input.Crouch ? desiredCrouchHeight : standingHeight;
 
-        // compute center relative to original baseline X/Z but using half of targetHeight
+        // center computed relative to immutable baseline X/Z
         _targetCenter = new Vector3(_originalControllerCenter.x, _targetHeight / 2f, _originalControllerCenter.z);
 
-        // Smooth local values
         if (movementConfig != null)
         {
             _currentHeight = Mathf.Lerp(_currentHeight, _targetHeight, movementConfig.crouchTransitionSpeed * Time.deltaTime);
@@ -178,13 +227,11 @@ public class PlayerMovement : MonoBehaviour
             _currentCenter = _targetCenter;
         }
 
-        // Only apply if change bigger than epsilon to avoid jitter
         bool heightChanged = Mathf.Abs(_controller.height - _currentHeight) > HeightApplyEpsilon;
         bool centerChanged = Vector3.Distance(_controller.center, _currentCenter) > CenterApplyEpsilon;
 
         if (heightChanged || centerChanged)
         {
-            // if increasing height (standing), ensure space is clear
             if (_targetHeight > _controller.height)
             {
                 float checkOffset = (_targetHeight - _controller.height) + 0.05f;
@@ -195,55 +242,52 @@ public class PlayerMovement : MonoBehaviour
                 }
                 else
                 {
-                    // blocked: don't stand, but keep center in sync to avoid misalignment
+                    // blocked: remain crouched but sync center to avoid misalignment
                     ApplyControllerHeightCenter(Mathf.Min(_controller.height, _currentHeight), _currentCenter);
                 }
             }
             else
             {
-                // lowering height or changing center: apply directly
                 ApplyControllerHeightCenter(_currentHeight, _currentCenter);
             }
         }
-
-        // Move camera if provided (localY moves similar to crouch)
-        if (playerCamera != null && movementConfig != null)
-        {
-            Vector3 camTarget = input.Crouch ? _cameraLocalPosCrouched : _cameraLocalPosStanding;
-            playerCamera.localPosition = Vector3.Lerp(playerCamera.localPosition, camTarget, movementConfig.crouchTransitionSpeed * Time.deltaTime);
-        }
-
-        // Final move
-        Vector3 finalVel = _horizontalVelocity + Vector3.up * _verticalSpeed;
-        _controller.Move(finalVel * Time.deltaTime);
     }
 
     private void ApplyControllerHeightCenter(float height, Vector3 center)
     {
-        // Apply and log change only if it differs from last-applied tracked values
         _controller.height = height;
         _controller.center = center;
 
         if (Mathf.Abs(_lastAppliedHeight - height) > HeightApplyEpsilon ||
             Vector3.Distance(_lastAppliedCenter, center) > CenterApplyEpsilon)
         {
-            Debug.Log($"[PlayerMovement] Applied CharacterController height={height:F3} center={center} at time={Time.time}", this);
+            //Debug.Log($"[PlayerMovement] Applied CharacterController height={height:F3} center={center} at time={Time.time}", this);
             _lastAppliedHeight = height;
             _lastAppliedCenter = center;
         }
     }
+    #endregion
 
-    private void GroundCheck()
+    #region Camera
+    private void SetCameraPos(PlayerInputState input)
+    {
+        if (playerCamera != null && movementConfig != null)
+        {
+            Vector3 camTarget = input.Crouch ? _cameraLocalPosCrouched : _cameraLocalPosStanding;
+            playerCamera.localPosition = Vector3.Lerp(playerCamera.localPosition, camTarget, movementConfig.crouchTransitionSpeed * Time.deltaTime);
+        }
+    }
+    #endregion
+
+    #region Grounding & movement execution
+    private void UpdateGround()
     {
         Vector3 origin = _transform.position + Vector3.up * 0.1f;
         float radius = Mathf.Max(0.1f, _controller.radius * 0.8f);
-        
-        // Use SphereCast for more reliable ground detection
+
         _isGrounded = Physics.SphereCast(origin, radius, Vector3.down, out RaycastHit hit, groundCheckDistance + 0.1f, movementConfig.groundLayers, QueryTriggerInteraction.Ignore)
                       && Vector3.Angle(hit.normal, Vector3.up) <= movementConfig.maxSlopeAngle;
-        
-        // Additional check: if we're very close to the ground and not moving up, consider grounded
-        // Allow ground detection even when falling fast, but only apply slowdown when landing
+
         if (!_isGrounded && _verticalSpeed <= 0.1f)
         {
             if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit2, groundCheckDistance + 0.2f, movementConfig.groundLayers, QueryTriggerInteraction.Ignore))
@@ -251,14 +295,21 @@ public class PlayerMovement : MonoBehaviour
                 _isGrounded = Vector3.Angle(hit2.normal, Vector3.up) <= movementConfig.maxSlopeAngle;
             }
         }
-        
-        // Fallback: Use CharacterController's built-in ground detection as backup
+
         if (!_isGrounded && _controller.isGrounded)
         {
             _isGrounded = true;
         }
-        
     }
 
+    private void PerformMove()
+    {
+        Vector3 finalVel = _horizontalVelocity + Vector3.up * _verticalSpeed;
+        _controller.Move(finalVel * Time.deltaTime);
+    }
+    #endregion
+
+    #region Utility
     public float CurrentHorizontalSpeed => new Vector3(_horizontalVelocity.x, 0, _horizontalVelocity.z).magnitude;
+    #endregion
 }
