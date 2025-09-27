@@ -17,7 +17,7 @@ MonoBehaviour:
   spareAmmo: 36
   reloadTime: 1.2
   fireMode: 0
-  roundsPerMinute: 400
+  roundsPerMinute: 300
   burstCount: 3
   spreadAngle: 1.2
   projectilePrefab: {fileID: 2740742594864783072, guid: ccccb452f85723746b39aa61c478ffe6,
