@@ -163,7 +163,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 317851369}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -1060,7 +1060,7 @@ MonoBehaviour:
   playerCamera: {fileID: 923125092}
   standingHeight: 2
   controllerRadius: 0.5
-  groundCheckDistance: 4.79
+  groundCheckDistance: 0.2
 --- !u!1 &1929534573
 GameObject:
   m_ObjectHideFlags: 0
