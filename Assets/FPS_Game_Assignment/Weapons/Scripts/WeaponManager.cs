@@ -1,4 +1,5 @@
 // WeaponManager.cs
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,6 +18,7 @@ public class WeaponManager : MonoBehaviour
     private List<WeaponBase> _instantiated = new List<WeaponBase>();
     private int _currentIndex = -1;
 
+    public event Action<WeaponBase> OnWeaponEquipped;
     private void Start()
     {
         // instantiate all weapons but disable them. This lets us switch quickly.
@@ -52,6 +54,8 @@ public class WeaponManager : MonoBehaviour
         // place at holder; muzzleLocalPosition from data sets local placement if wanted
         Vector3 localPos = w.data != null ? w.data.muzzleLocalPosition : Vector3.zero;
         w.Equip(weaponHolder, localPos, Quaternion.identity);
+
+        OnWeaponEquipped?.Invoke(w);
     }
 
     public WeaponBase GetCurrentWeapon()

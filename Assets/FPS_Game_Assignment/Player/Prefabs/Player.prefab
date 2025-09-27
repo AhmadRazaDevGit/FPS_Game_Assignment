@@ -517,6 +517,16 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 4162210479167394140, guid: 8951399af14bac84e9b5dc2c768d25aa,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 693
+      objectReference: {fileID: 0}
+    - target: {fileID: 4162210479167394140, guid: 8951399af14bac84e9b5dc2c768d25aa,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 47
+      objectReference: {fileID: 0}
     - target: {fileID: 4225936543904644674, guid: 8951399af14bac84e9b5dc2c768d25aa,
         type: 3}
       propertyPath: m_Layer
@@ -532,6 +542,11 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 7789457163771507259, guid: 8951399af14bac84e9b5dc2c768d25aa,
+        type: 3}
+      propertyPath: weaponManager
+      value: 
+      objectReference: {fileID: 5978172607175884920}
     - target: {fileID: 8969890121663788834, guid: 8951399af14bac84e9b5dc2c768d25aa,
         type: 3}
       propertyPath: m_Layer

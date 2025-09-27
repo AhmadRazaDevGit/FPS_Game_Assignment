@@ -34,7 +34,8 @@ public abstract class WeaponBase : MonoBehaviour
     public event Action ReloadStarted;
     /// <summary>Fired when reload completes or is aborted.</summary>
     public event Action ReloadCompleted;
-
+    /// <summary>Raised whenever the current magazine or spare ammo changes.</summary>
+    public event Action<int, int> AmmoChanged;
     protected virtual void Awake()
     {
         _audio = GetComponent<AudioSource>();
@@ -46,7 +47,11 @@ public abstract class WeaponBase : MonoBehaviour
             hitMask = data.hitMask;
         }
     }
-
+    protected virtual void Start()
+    {
+        // Broadcast starting ammo so UI initializes correctly
+        AmmoChanged?.Invoke(currentAmmo, spareAmmo);
+    }
     // Public wrapper to start reload from UI or code
     public void StartReload()
     {
@@ -80,6 +85,9 @@ public abstract class WeaponBase : MonoBehaviour
         currentAmmo += toLoad;
         spareAmmo -= toLoad;
 
+        // notify UI
+        AmmoChanged?.Invoke(currentAmmo, spareAmmo);
+
         ReloadProgressChanged?.Invoke(1f);
         IsReloading = false;
         ReloadCompleted?.Invoke();
@@ -91,6 +99,9 @@ public abstract class WeaponBase : MonoBehaviour
         transform.localPosition = localPos;
         transform.localRotation = localRot;
         gameObject.SetActive(true);
+
+        // push ammo state when equipped (UI will subscribe via WeaponManager.OnWeaponEquipped)
+        AmmoChanged?.Invoke(currentAmmo, spareAmmo);
     }
 
     public virtual void Unequip()
@@ -161,6 +172,7 @@ public abstract class WeaponBase : MonoBehaviour
         {
             Debug.LogWarning("Projectile pool or prefab missing on weapon: " + name);
             currentAmmo--;
+            AmmoChanged?.Invoke(currentAmmo, spareAmmo);
             return;
         }
 
@@ -174,6 +186,8 @@ public abstract class WeaponBase : MonoBehaviour
         }
 
         currentAmmo--;
+
+        AmmoChanged?.Invoke(currentAmmo, spareAmmo);
         OnFireEffects();
     }
 
