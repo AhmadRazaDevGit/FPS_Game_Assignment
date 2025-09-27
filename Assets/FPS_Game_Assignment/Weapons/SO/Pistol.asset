@@ -22,7 +22,7 @@ MonoBehaviour:
   spreadAngle: 1.2
   projectilePrefab: {fileID: 2740742594864783072, guid: ccccb452f85723746b39aa61c478ffe6,
     type: 3}
-  muzzleLocalPosition: {x: 0, y: 0, z: 1}
+  muzzleLocalPosition: {x: 0, y: 0, z: 0}
   projectileSpeed: 60
   projectileLifetime: 3
   damage: 20

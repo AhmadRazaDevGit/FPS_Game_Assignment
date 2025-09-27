@@ -15,9 +15,7 @@ public abstract class WeaponBase : MonoBehaviour
     [Tooltip("Pool that contains the projectile prefab.")]
     public ObjectPool projectilePool;
 
-    [Header("Assign only for editor/debug")]
-    [Tooltip("Layer mask applying to projectile hits.")]
-    public LayerMask hitMask;
+    private LayerMask hitMask;
 
     // runtime ammo tracking
     protected int currentAmmo;
