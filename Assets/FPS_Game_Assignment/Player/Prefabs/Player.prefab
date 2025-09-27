@@ -377,6 +377,11 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 223553108245424400, guid: 8951399af14bac84e9b5dc2c768d25aa,
+        type: 3}
+      propertyPath: weaponManager
+      value: 
+      objectReference: {fileID: 5978172607175884920}
     - target: {fileID: 507463243156874421, guid: 8951399af14bac84e9b5dc2c768d25aa,
         type: 3}
       propertyPath: m_Layer

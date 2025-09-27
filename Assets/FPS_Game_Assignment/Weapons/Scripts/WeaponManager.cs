@@ -59,7 +59,11 @@ public class WeaponManager : MonoBehaviour
         if (_currentIndex < 0) return null;
         return _instantiated[_currentIndex];
     }
-
+    // call from UI
+    public void StartReloadCurrent()
+    {
+        GetCurrentWeapon()?.StartReload();
+    }
     public void SwitchNext()
     {
         if (_instantiated.Count <= 1) return;

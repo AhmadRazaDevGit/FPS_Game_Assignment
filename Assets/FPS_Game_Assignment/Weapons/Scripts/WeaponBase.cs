@@ -1,4 +1,4 @@
-// WeaponBase.cs
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -10,7 +10,7 @@ public abstract class WeaponBase : MonoBehaviour
     public WeaponData data;
 
     [Tooltip("Transform used as muzzle spawn point (local to WeaponHolder).")]
-    public Transform muzzleTransform; // can be assigned to empty at WeaponHolder
+    public Transform muzzleTransform;
 
     [Tooltip("Pool that contains the projectile prefab.")]
     public ObjectPool projectilePool;
@@ -28,6 +28,15 @@ public abstract class WeaponBase : MonoBehaviour
     protected Coroutine _firingRoutine;
     protected AudioSource _audio;
 
+    // Reloading state & events
+    public bool IsReloading { get; private set; } = false;
+    /// <summary>Normalized [0..1] reload progress event.</summary>
+    public event Action<float> ReloadProgressChanged;
+    /// <summary>Fired when reload starts.</summary>
+    public event Action ReloadStarted;
+    /// <summary>Fired when reload completes or is aborted.</summary>
+    public event Action ReloadCompleted;
+
     protected virtual void Awake()
     {
         _audio = GetComponent<AudioSource>();
@@ -38,6 +47,44 @@ public abstract class WeaponBase : MonoBehaviour
             _timeBetweenShots = 60f / data.roundsPerMinute;
             hitMask = data.hitMask;
         }
+    }
+
+    // Public wrapper to start reload from UI or code
+    public void StartReload()
+    {
+        // basic guard clauses
+        if (IsReloading || data == null) return;
+        if (currentAmmo >= data.magazineSize) return; // nothing to reload
+        if (spareAmmo <= 0) return; // no spare ammo
+
+        StartCoroutine(ReloadProcess());
+    }
+
+    // internal reload coroutine that updates progress and fires events
+    private IEnumerator ReloadProcess()
+    {
+        IsReloading = true;
+        ReloadStarted?.Invoke();
+
+        float duration = Mathf.Max(0.001f, data.reloadTime);
+        float timer = 0f;
+
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            ReloadProgressChanged?.Invoke(Mathf.Clamp01(timer / duration));
+            yield return null;
+        }
+
+        // Perform the actual ammo refill
+        int needed = data.magazineSize - currentAmmo;
+        int toLoad = Mathf.Min(needed, spareAmmo);
+        currentAmmo += toLoad;
+        spareAmmo -= toLoad;
+
+        ReloadProgressChanged?.Invoke(1f);
+        IsReloading = false;
+        ReloadCompleted?.Invoke();
     }
 
     public virtual void Equip(Transform parent, Vector3 localPos, Quaternion localRot)
@@ -57,6 +104,7 @@ public abstract class WeaponBase : MonoBehaviour
 
     public void TryStartFire()
     {
+        if (IsReloading) return; // block firing while reloading
         if (_isFiring) return;
         _isFiring = true;
         _firingRoutine = StartCoroutine(FireLoop());
@@ -75,9 +123,8 @@ public abstract class WeaponBase : MonoBehaviour
         switch (data.fireMode)
         {
             case WeaponData.FireMode.SemiAuto:
-                // Single shot per input press - handled externally by StartFire call
                 FireOne();
-                _isFiring = false; // stop after one
+                _isFiring = false;
                 break;
 
             case WeaponData.FireMode.FullAuto:
@@ -97,7 +144,6 @@ public abstract class WeaponBase : MonoBehaviour
                         FireOne();
                         yield return new WaitForSeconds(_timeBetweenShots);
                     }
-                    // after burst wait for full trigger reset (optional). Here we break loop so player must release/re-press.
                     _isFiring = false;
                 }
                 break;
@@ -106,13 +152,13 @@ public abstract class WeaponBase : MonoBehaviour
 
     protected virtual void FireOne()
     {
+        if (IsReloading) return; // extra safeguard
         if (currentAmmo <= 0)
         {
             OnEmpty();
             return;
         }
 
-        // spawn projectile from pool
         if (projectilePool == null || data.projectilePrefab == null)
         {
             Debug.LogWarning("Projectile pool or prefab missing on weapon: " + name);
@@ -120,7 +166,6 @@ public abstract class WeaponBase : MonoBehaviour
             return;
         }
 
-        // calculate direction with spread
         Vector3 dir = CalculateSpreadDirection(muzzleTransform.forward, data.spreadAngle);
 
         GameObject projGo = projectilePool.Get();
@@ -137,39 +182,24 @@ public abstract class WeaponBase : MonoBehaviour
     protected Vector3 CalculateSpreadDirection(Vector3 forward, float spreadAngleDeg)
     {
         if (spreadAngleDeg <= 0f) return forward;
-        // random direction inside cone
         float halfAngle = spreadAngleDeg * 0.5f;
-        float yaw = Random.Range(-halfAngle, halfAngle);
-        float pitch = Random.Range(-halfAngle, halfAngle);
+        float yaw = UnityEngine.Random.Range(-halfAngle, halfAngle);
+        float pitch = UnityEngine.Random.Range(-halfAngle, halfAngle);
         Quaternion rot = Quaternion.Euler(pitch, yaw, 0);
         return rot * forward;
     }
 
     protected virtual void OnFireEffects()
     {
-        // play sound, muzzle flash, recoil stubs (implement in derived classes or add simple audio clip)
         if (_audio && _audio.clip) _audio.PlayOneShot(_audio.clip);
     }
 
     protected virtual void OnEmpty()
     {
         // click sound or UI hint
-        // could play empty click sound by _audio
     }
 
-    public virtual IEnumerator Reload()
-    {
-        if (currentAmmo >= data.magazineSize || spareAmmo <= 0) yield break;
-        // simple reload
-        yield return new WaitForSeconds(data.reloadTime);
-
-        int needed = data.magazineSize - currentAmmo;
-        int toLoad = Mathf.Min(needed, spareAmmo);
-        currentAmmo += toLoad;
-        spareAmmo -= toLoad;
-    }
-
-    // Helper accessors
+    // quick accessors
     public int CurrentAmmo => currentAmmo;
     public int SpareAmmo => spareAmmo;
 }
