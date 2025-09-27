@@ -182,7 +182,7 @@ public class PlayerMovement : MonoBehaviour
         {
             _verticalSpeed = movementConfig.jumpForce;
             _isGrounded = false;
-            Debug.Log($"[PlayerMovement] Jump triggered! Force: {movementConfig.jumpForce}, Grounded: {_isGrounded}, WasGrounded: {_wasGroundedLastFrame}", this);
+           // Debug.Log($"[PlayerMovement] Jump triggered! Force: {movementConfig.jumpForce}, Grounded: {_isGrounded}, WasGrounded: {_wasGroundedLastFrame}", this);
         }
         else if (input.Jump && !canJump)
         {
