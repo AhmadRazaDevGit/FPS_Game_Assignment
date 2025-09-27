@@ -16,7 +16,7 @@ MonoBehaviour:
   groundAcceleration: 20
   airAcceleration: 6
   gravity: 9.81
-  jumpForce: 6
+  jumpForce: 4
   crouchHeightMultiplier: 0.5
   crouchSpeedMultiplier: 0.5
   crouchTransitionSpeed: 8

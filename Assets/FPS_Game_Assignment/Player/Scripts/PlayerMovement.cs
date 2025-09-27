@@ -22,7 +22,7 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Settings")]
     [SerializeField, Tooltip("Height from player origin to sphere used to check grounding")]
-    private float groundCheckDistance = 0.2f;
+    private float groundCheckDistance = 0.3f;
 
     private IInputProvider _inputProvider;
     private CharacterController _controller;
@@ -32,6 +32,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 _horizontalVelocity;
     private bool _isGrounded;
     private float _verticalSpeed;
+    private bool _wasGroundedLastFrame; // Track previous grounded state for jump buffering
 
     // crouch smoothing state
     private float _targetHeight;
@@ -105,6 +106,9 @@ public class PlayerMovement : MonoBehaviour
     {
         var input = _inputProvider.GetInput();
 
+        // Store previous grounded state for jump buffering
+        _wasGroundedLastFrame = _isGrounded;
+        
         GroundCheck();
 
         // movement input
@@ -125,20 +129,33 @@ public class PlayerMovement : MonoBehaviour
             _horizontalVelocity = Vector3.Lerp(_horizontalVelocity, new Vector3(desiredWorld.x, 0, desiredWorld.z), movementConfig.airControl * Time.deltaTime);
         }
 
-        // Jump (edge) — do not allow jump while crouched
-        if (_isGrounded && input.Jump && !input.Crouch)
+        // Jump (edge) ï¿½ do not allow jump while crouched
+        // Allow jump if grounded OR if we were grounded recently (jump buffering)
+        bool canJump = (_isGrounded || _wasGroundedLastFrame) && !input.Crouch;
+        if (canJump && input.Jump)
         {
             _verticalSpeed = movementConfig.jumpForce;
             _isGrounded = false;
+            Debug.Log($"[PlayerMovement] Jump triggered! Force: {movementConfig.jumpForce}, Grounded: {_isGrounded}, WasGrounded: {_wasGroundedLastFrame}", this);
+        }
+        else if (input.Jump && !canJump)
+        {
+            Debug.Log($"[PlayerMovement] Jump input received but cannot jump. Grounded: {_isGrounded}, WasGrounded: {_wasGroundedLastFrame}, Crouch: {input.Crouch}", this);
         }
 
-        // gravity
+        // Apply gravity and handle grounded state
         if (_isGrounded)
         {
-            if (!input.Jump) _verticalSpeed = -0.5f;
+            // Only apply downward force if we're actually landing (slow downward movement)
+            // This prevents the slowdown when falling
+            if (_verticalSpeed < 0 && _verticalSpeed > -2f) 
+            {
+                _verticalSpeed = -0.5f; // Only when actually landing
+            }
         }
         else
         {
+            // Apply gravity when in air - no interference with falling
             _verticalSpeed -= movementConfig.gravity * Time.deltaTime;
         }
 
@@ -219,9 +236,33 @@ public class PlayerMovement : MonoBehaviour
     private void GroundCheck()
     {
         Vector3 origin = _transform.position + Vector3.up * 0.1f;
-        float radius = Mathf.Max(0.05f, _controller.radius * 0.9f);
-        _isGrounded = Physics.Raycast(origin, Vector3.down, out RaycastHit hit, groundCheckDistance + 0.05f, movementConfig.groundLayers, QueryTriggerInteraction.Ignore)
+        float radius = Mathf.Max(0.1f, _controller.radius * 0.8f);
+        
+        // Use SphereCast for more reliable ground detection
+        _isGrounded = Physics.SphereCast(origin, radius, Vector3.down, out RaycastHit hit, groundCheckDistance + 0.1f, movementConfig.groundLayers, QueryTriggerInteraction.Ignore)
                       && Vector3.Angle(hit.normal, Vector3.up) <= movementConfig.maxSlopeAngle;
+        
+        // Additional check: if we're very close to the ground and not moving up, consider grounded
+        // Allow ground detection even when falling fast, but only apply slowdown when landing
+        if (!_isGrounded && _verticalSpeed <= 0.1f)
+        {
+            if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit2, groundCheckDistance + 0.2f, movementConfig.groundLayers, QueryTriggerInteraction.Ignore))
+            {
+                _isGrounded = Vector3.Angle(hit2.normal, Vector3.up) <= movementConfig.maxSlopeAngle;
+            }
+        }
+        
+        // Fallback: Use CharacterController's built-in ground detection as backup
+        if (!_isGrounded && _controller.isGrounded)
+        {
+            _isGrounded = true;
+        }
+        
+        // Debug ground state changes
+        if (_isGrounded && !_wasGroundedLastFrame)
+        {
+            Debug.Log($"[PlayerMovement] Just landed! Grounded: {_isGrounded}, VerticalSpeed: {_verticalSpeed}", this);
+        }
     }
 
     public float CurrentHorizontalSpeed => new Vector3(_horizontalVelocity.x, 0, _horizontalVelocity.z).magnitude;
