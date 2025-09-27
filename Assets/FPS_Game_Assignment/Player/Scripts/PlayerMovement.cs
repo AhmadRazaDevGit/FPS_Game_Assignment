@@ -258,11 +258,6 @@ public class PlayerMovement : MonoBehaviour
             _isGrounded = true;
         }
         
-        // Debug ground state changes
-        if (_isGrounded && !_wasGroundedLastFrame)
-        {
-            Debug.Log($"[PlayerMovement] Just landed! Grounded: {_isGrounded}, VerticalSpeed: {_verticalSpeed}", this);
-        }
     }
 
     public float CurrentHorizontalSpeed => new Vector3(_horizontalVelocity.x, 0, _horizontalVelocity.z).magnitude;
