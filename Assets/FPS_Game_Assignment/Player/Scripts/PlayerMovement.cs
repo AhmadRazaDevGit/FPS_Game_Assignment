@@ -220,7 +220,7 @@ public class PlayerMovement : MonoBehaviour
     {
         Vector3 origin = _transform.position + Vector3.up * 0.1f;
         float radius = Mathf.Max(0.05f, _controller.radius * 0.9f);
-        _isGrounded = Physics.SphereCast(origin, radius, Vector3.down, out RaycastHit hit, groundCheckDistance + 0.05f, movementConfig.groundLayers, QueryTriggerInteraction.Ignore)
+        _isGrounded = Physics.Raycast(origin, Vector3.down, out RaycastHit hit, groundCheckDistance + 0.05f, movementConfig.groundLayers, QueryTriggerInteraction.Ignore)
                       && Vector3.Angle(hit.normal, Vector3.up) <= movementConfig.maxSlopeAngle;
     }
 

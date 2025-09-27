@@ -13,11 +13,13 @@ MonoBehaviour:
   m_Name: MovementConfig
   m_EditorClassIdentifier: 
   walkSpeed: 3.5
-  sprintMultiplier: 1.7
   groundAcceleration: 20
   airAcceleration: 6
   gravity: 9.81
-  jumpForce: 60
+  jumpForce: 6
+  crouchHeightMultiplier: 0.5
+  crouchSpeedMultiplier: 0.5
+  crouchTransitionSpeed: 8
   airControl: 0.6
   maxSlopeAngle: 50
   groundLayers:
