@@ -1542,7 +1542,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   background: {fileID: 675478069231553754}
   knob: {fileID: 675478069461069531}
-  handleRange: 50
+  handleRange: 100
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
