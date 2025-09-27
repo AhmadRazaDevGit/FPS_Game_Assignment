@@ -7,10 +7,10 @@ using UnityEngine;
 /// </summary>
 public class Pistol : WeaponBase
 {
-    // e.g. attach audio clips, recoil parameters etc.
-    [Header("Pistol Extras")]
-    [Tooltip("Recoil strength for camera kick (applies to camera controller if available).")]
-    public float recoilStrength = 1.0f;
+    //// e.g. attach audio clips, recoil parameters etc.
+    //[Header("Pistol Extras")]
+    //[Tooltip("Recoil strength for camera kick (applies to camera controller if available).")]
+    //public float recoilStrength = 1.0f;
 
     protected override void OnFireEffects()
     {
