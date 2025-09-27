@@ -112,37 +112,6 @@ MonoBehaviour:
   weaponHolder: {fileID: 467239624483013633}
   weaponPrefabs:
   - {fileID: 4744677183645488969, guid: 261d374cd022b2e4ba9c31e9ae16ce4e, type: 3}
---- !u!1 &4968729896257257389
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4205060732050802482}
-  m_Layer: 6
-  m_Name: Pistol
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4205060732050802482
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4968729896257257389}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.9997224, z: -0, w: -0.02355955}
-  m_LocalPosition: {x: 0.125, y: -0.169, z: 0.387}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 467239624483013633}
-  m_LocalEulerAnglesHint: {x: 0, y: 182.7, z: 0}
 --- !u!1 &5479089088135871719
 GameObject:
   m_ObjectHideFlags: 0
@@ -306,11 +275,10 @@ Transform:
   m_GameObject: {fileID: 7233998540514055099}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.127, y: -0.183, z: 0.398}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 4205060732050802482}
+  m_Children: []
   m_Father: {fileID: 2702611522994545928}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8683517549805330949
