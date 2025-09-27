@@ -4,14 +4,14 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public class Projectile : MonoBehaviour
 {
-    [Tooltip("Speed in units/second.")]
-    public float speed = 60f;
-    [Tooltip("Seconds before auto-returning to pool.")]
-    public float lifetime = 3f;
-    [Tooltip("Damage dealt on hit.")]
-    public float damage = 20f;
-    [Tooltip("Layers we can hit.")]
-    public LayerMask hitMask = ~0;
+
+    private float speed = 60f;
+   
+    private float lifetime = 3f;
+ 
+    private float damage = 20f;
+
+    private LayerMask hitMask = ~0;
 
     private float _expiration;
     private Vector3 _direction;
