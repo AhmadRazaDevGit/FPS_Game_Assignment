@@ -7,9 +7,6 @@ public class MovementConfig : ScriptableObject
     [Tooltip("Ground walk speed (units/sec)")]
     public float walkSpeed = 3.5f;
 
-    [Tooltip("Sprint multiplier applied to walkSpeed")]
-    public float sprintMultiplier = 1.7f;
-
     [Header("Acceleration")]
     [Tooltip("How quickly velocity approaches target on ground")]
     public float groundAcceleration = 20f;

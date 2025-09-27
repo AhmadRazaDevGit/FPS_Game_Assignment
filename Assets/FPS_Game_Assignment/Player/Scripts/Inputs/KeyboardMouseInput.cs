@@ -10,9 +10,6 @@ public class KeyboardMouseInput : MonoBehaviour, IInputProvider
     [Tooltip("Name of the Input Manager axis for vertical movement (e.g. \"Vertical\").")]
     [SerializeField] private string verticalAxis = "Vertical";
 
-    [Tooltip("Key to hold for sprinting (checked with Input.GetKey).")]
-    [SerializeField] private KeyCode sprintKey = KeyCode.LeftShift;
-
     [Tooltip("Key to press to jump (checked with Input.GetKeyDown).")]
     [SerializeField] private KeyCode jumpKey = KeyCode.Space;
 
@@ -23,7 +20,6 @@ public class KeyboardMouseInput : MonoBehaviour, IInputProvider
         // No memory allocation; use existing struct
         _state.Move.x = Input.GetAxisRaw(horizontalAxis);
         _state.Move.y = Input.GetAxisRaw(verticalAxis);
-        _state.Sprint = Input.GetKey(sprintKey);
         _state.Jump = Input.GetKeyDown(jumpKey);
         return _state;
     }

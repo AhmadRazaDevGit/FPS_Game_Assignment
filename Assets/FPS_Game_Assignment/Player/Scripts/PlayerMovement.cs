@@ -57,7 +57,7 @@ public class PlayerMovement : MonoBehaviour
         
         Vector3 desiredLocal = new Vector3(input.Move.x, 0f, input.Move.y);
         desiredLocal = Vector3.ClampMagnitude(desiredLocal, 1f); // prevent faster diagonal
-        float targetSpeed = movementConfig.walkSpeed * (input.Sprint ? movementConfig.sprintMultiplier : 1f);
+        float targetSpeed = movementConfig.walkSpeed;
 
         Vector3 desiredWorld = _transform.TransformDirection(desiredLocal) * targetSpeed;
 
