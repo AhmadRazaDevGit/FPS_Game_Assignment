@@ -45,9 +45,9 @@ public class Projectile : MonoBehaviour
     private void OnHit(RaycastHit hit)
     {
         // Try to apply damage
-        var damageable = hit.collider.GetComponentInParent<IDamageable>();
+        var damageable = hit.collider.GetComponentInParent<IHealth>();
         if (damageable != null)
-            damageable.TakeDamage(damage, hit.point, hit.normal);
+            damageable.TakeDamage(damage, hit.transform.gameObject);
 
         // Add impact effects here (decals, particles) - keep simple for mobile
 

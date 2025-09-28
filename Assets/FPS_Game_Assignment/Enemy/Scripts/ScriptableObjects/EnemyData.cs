@@ -29,6 +29,12 @@ public class EnemyData : ScriptableObject
     [Tooltip("Seconds between consecutive attacks.")]
     public float attackCooldown = 1.0f;
 
+    [Header("Hit / Stagger")]
+    [Tooltip("Name of the hit/recover animation state.")]
+    public string hitAnimationName = "Hit";
+    [Tooltip("Seconds to stay in HitState (fallback if animation length unknown).")]
+    public float hitRecoveryTime = 0.6f;
+
     [Header("Animation")]
     [Tooltip("Name of the idle animation/state used by the animator.")]
     public string idleAnimationName = "Idle";

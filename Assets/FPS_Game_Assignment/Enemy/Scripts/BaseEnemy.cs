@@ -31,6 +31,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
     private PatrolState _patrolState;
     private ChaseState _chaseState;
     private AttackState _attackState;
+    private HitState _hitState;
     private void Awake()
     {
         Animator = GetComponent<Animator>();
@@ -42,7 +43,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         // If sensor not assigned in inspector, try to find one in children (non-allocating GetComponent in Awake is fine)
         if (sensor == null)
             sensor = GetComponentInChildren<EnemySensor>();
-        
+
         InitializeStates();
     }
 
@@ -86,6 +87,8 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         _patrolState = new PatrolState(this);
         _chaseState = new ChaseState(this);
         _attackState = new AttackState(this);
+        _hitState = new HitState(this);
+
         // wire transitions (set next states)
         _idleState.SetNextState(_patrolState);
         _patrolState.SetNextState(_idleState);
@@ -115,9 +118,26 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         _attackState.ClearTarget();
         SwitchState(_idleState);
     }
+
+    public void OnHit()
+    {
+        SwitchState(_hitState);
+    }
     public void Attack()
     {
         _attackState?.DoAttack();
+    }
+
+    public void RevertToPreviousState()
+    {
+        if (StateMachine.PreviousState != null)
+        {
+            StateMachine.RevertToPrevious();
+        }
+        else
+        {
+            StateMachine.ChangeState(_idleState);
+        }
     }
 
 #if UNITY_EDITOR

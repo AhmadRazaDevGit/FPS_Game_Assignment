@@ -17,4 +17,6 @@ public interface IEnemyContext
 
     void NotifyTargetLost(Transform target);
 
+    void RevertToPreviousState();
+
 }

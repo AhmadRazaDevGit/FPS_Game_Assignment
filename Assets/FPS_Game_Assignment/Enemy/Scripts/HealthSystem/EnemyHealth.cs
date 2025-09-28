@@ -1,0 +1,21 @@
+using UnityEngine;
+
+public class EnemyHealth : HealthBase
+{
+    private BaseEnemy baseEnemy;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        baseEnemy = GetComponent<BaseEnemy>();
+    }
+    public override void TakeDamage(float amount, GameObject source = null)
+    {
+        base.TakeDamage(amount, source);
+        baseEnemy.OnHit();
+    }
+    protected override void OnDeath(GameObject source)
+    {
+
+    }
+}
