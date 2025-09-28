@@ -48,8 +48,8 @@ public class AttackState : IState
         // Lost target -> fallback (Idle)
         if (dist > d.chaseLoseDistance)
         {
+            _context.NotifyTargetLost(_target);
             ClearTarget();
-            _context.SwitchState(_nextState);
             return;
         }
 
@@ -85,6 +85,11 @@ public class AttackState : IState
         if (iHealth != null)
         {
             iHealth.TakeDamage(dmg);
+            if (iHealth.CurrentHealth <= 0)
+            {
+                _context.NotifyTargetLost(_target);
+                ClearTarget();
+            }
             return;
         }
 
