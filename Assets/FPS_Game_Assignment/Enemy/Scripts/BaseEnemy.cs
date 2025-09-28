@@ -18,6 +18,9 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
     [Tooltip("Optional: assign an EnemySensor (child or same object). If left empty, the script will look for one in children.")]
     [SerializeField] protected EnemySensor sensor;
 
+    [Header("Health")]
+    [Tooltip("Optional: assign an health (child or same object). If left empty, the script will look for one in component.")]
+    [SerializeField] protected EnemyHealth enemyHealth;
     // Exposed to states via IEnemyContext
     public Animator Animator { get; private set; }
     public NavMeshAgent Agent { get; private set; }
@@ -32,6 +35,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
     protected ChaseState _chaseState;
     protected AttackState _attackState;
     protected HitState _hitState;
+    protected DieState _dieState;
     protected virtual void Awake()
     {
         Animator = GetComponent<Animator>();
@@ -40,9 +44,11 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
 
         StateMachine = new StateMachine();
 
-        // If sensor not assigned in inspector, try to find one in children (non-allocating GetComponent in Awake is fine)
+
         if (sensor == null)
             sensor = GetComponentInChildren<EnemySensor>();
+        if (enemyHealth == null)
+            enemyHealth = GetComponent<EnemyHealth>();
 
         InitializeStates();
     }
@@ -52,6 +58,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         if (sensor != null)
         {
             sensor.OnDetected += HandleTargetDetected;
+            enemyHealth.OnEnemyDeath += GoToDieState;
         }
     }
 
@@ -60,6 +67,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         if (sensor != null)
         {
             sensor.OnDetected -= HandleTargetDetected;
+            enemyHealth.OnEnemyDeath -= GoToDieState;
         }
     }
 
@@ -88,12 +96,18 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         _chaseState = new ChaseState(this);
         _attackState = new AttackState(this);
         _hitState = new HitState(this);
+        _dieState = new DieState(this);
 
         // wire transitions (set next states)
         _idleState.SetNextState(_patrolState);
         _patrolState.SetNextState(_idleState);
         _chaseState.SetNextState(_attackState);
         _attackState.SetNextState(_chaseState);
+    }
+
+    private void GoToDieState()
+    {
+        SwitchState(_dieState);  
     }
 
     protected virtual void HandleTargetDetected(Transform target)

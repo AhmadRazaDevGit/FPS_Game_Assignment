@@ -24,7 +24,7 @@ public class HitState : IState
         _isActive = true;
 
         // stop navmesh movement
-        if (_context.Agent != null)
+        if (_context.Agent != null && _context.Agent.isActiveAndEnabled)
         {
             _context.Agent.isStopped = true;
             _context.Agent.ResetPath();
@@ -56,7 +56,7 @@ public class HitState : IState
     public void Exit()
     {
         // resume navmesh movement
-        if (_context.Agent != null)
+        if (_context.Agent != null && _context.Agent.isActiveAndEnabled)
         {
             _context.Agent.isStopped = false;
         }

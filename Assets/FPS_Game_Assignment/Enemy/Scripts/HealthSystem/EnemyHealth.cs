@@ -1,9 +1,10 @@
+using System;
 using UnityEngine;
 
 public class EnemyHealth : HealthBase
 {
     private BaseEnemy baseEnemy;
-
+    public event Action OnEnemyDeath;
     protected override void Awake()
     {
         base.Awake();
@@ -12,10 +13,13 @@ public class EnemyHealth : HealthBase
     public override void TakeDamage(float amount, GameObject source = null)
     {
         base.TakeDamage(amount, source);
-        baseEnemy.OnHit();
+        if (currentHealth > 0)
+            baseEnemy.OnHit();
     }
     protected override void OnDeath(GameObject source)
     {
-
+        OnEnemyDeath?.Invoke();
+        baseEnemy.Agent.enabled = false;
+        //baseEnemy.enabled = false;
     }
 }

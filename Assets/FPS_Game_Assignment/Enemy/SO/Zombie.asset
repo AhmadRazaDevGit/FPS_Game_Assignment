@@ -21,7 +21,10 @@ MonoBehaviour:
   detectionRadius: 8
   attackDamage: 10
   attackCooldown: 1
+  hitRecoveryTime: 0.6
   idleAnimationName: Idle
   patrolAnimationName: Patrol
   chaseAnimationName: Chase
   attackAnimationName: Attack
+  hitAnimationName: Hit
+  dieAnimationName: Die

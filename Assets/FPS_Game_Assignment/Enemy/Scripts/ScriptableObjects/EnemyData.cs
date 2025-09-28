@@ -45,5 +45,7 @@ public class EnemyData : ScriptableObject
     public string attackAnimationName = "Attack";
     [Tooltip("Name of the hit/recover animation state.")]
     public string hitAnimationName = "Hit";
+    [Tooltip("Name of the die animation state.")]
+    public string dieAnimationName = "Die";
 }
 
