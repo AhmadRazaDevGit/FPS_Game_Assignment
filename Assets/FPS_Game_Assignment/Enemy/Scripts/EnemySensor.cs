@@ -13,9 +13,6 @@ public class EnemySensor : MonoBehaviour
 
     public event Action<Transform> OnDetected;
 
-
-    public event Action<Transform> OnLost;
-
     private Transform _currentTarget;
 
     private SphereCollider col;
@@ -38,14 +35,4 @@ public class EnemySensor : MonoBehaviour
         _currentTarget = other.transform;
         OnDetected?.Invoke(_currentTarget);
     }
-
-    //private void OnTriggerExit(Collider other)
-    //{
-    //    if (_currentTarget == null) return;
-    //    if (((1 << other.gameObject.layer) & detectionMask) == 0) return;
-    //    if (other.transform != _currentTarget) return;
-
-    //    OnLost?.Invoke(_currentTarget);
-    //    _currentTarget = null;
-    //}
 }

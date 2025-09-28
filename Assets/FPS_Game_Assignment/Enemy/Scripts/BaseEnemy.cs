@@ -51,7 +51,6 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         if (sensor != null)
         {
             sensor.OnDetected += HandleTargetDetected;
-            sensor.OnLost += HandleTargetLost;
         }
     }
 
@@ -60,7 +59,6 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         if (sensor != null)
         {
             sensor.OnDetected -= HandleTargetDetected;
-            sensor.OnLost -= HandleTargetLost;
         }
     }
 
@@ -104,15 +102,17 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         SwitchState(_chaseState);
     }
 
+    public void NotifyTargetLost(Transform target)
+    {
+        HandleTargetLost(target);
+    }
+
     private void HandleTargetLost(Transform target)
     {
-        // Only react if we were chasing
-        if (StateMachine.CurrentState == _chaseState)
-        {
-            _chaseState.ClearTarget();
-            _attackState.ClearTarget();
-            SwitchState(_idleState);
-        }
+        if (target == null) return;
+        _chaseState.ClearTarget();
+        _attackState.ClearTarget();
+        SwitchState(_idleState);
     }
 
 #if UNITY_EDITOR

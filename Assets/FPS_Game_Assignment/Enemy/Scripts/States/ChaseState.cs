@@ -34,7 +34,6 @@ public class ChaseState : IState
         {
             _context.Agent.isStopped = false;
             _context.Agent.speed = d.chaseSpeed;
-            // FIX: use chase stopping distance instead of patrol one
             _context.Agent.stoppingDistance = d.chaseStoppingDistance;
         }
     }
@@ -60,11 +59,11 @@ public class ChaseState : IState
             // If target gets too far, treat as lost
             if (dist > _context.EnemyData.chaseLoseDistance)
             {
+                _context.NotifyTargetLost(_target);
                 ClearTarget();
-                _context.SwitchState(_nextState);
                 return;
             }
-           
+
             // If near enough to stoppingDistance, we can stop/chose next state (e.g., attack or idle)
             if (!_context.Agent.pathPending && dist <= (_context.Agent.stoppingDistance + 0.28f))
             {

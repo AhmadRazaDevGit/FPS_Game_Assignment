@@ -15,7 +15,7 @@ MonoBehaviour:
   idleDelayTime: 2
   patrolSpeed: 0.6
   patrolStoppingDistance: 0.5
-  chaseSpeed: 0.8
+  chaseSpeed: 0.9
   chaseStoppingDistance: 1
   chaseLoseDistance: 15
   detectionRadius: 8

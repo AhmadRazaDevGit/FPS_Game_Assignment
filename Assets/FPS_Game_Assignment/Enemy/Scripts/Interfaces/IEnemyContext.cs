@@ -15,4 +15,6 @@ public interface IEnemyContext
     List<Transform> Waypoints { get; }
     void SwitchState(IState newState);
 
+    void NotifyTargetLost(Transform target);
+
 }
