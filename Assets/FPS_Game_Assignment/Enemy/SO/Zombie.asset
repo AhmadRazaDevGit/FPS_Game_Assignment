@@ -20,7 +20,7 @@ MonoBehaviour:
   chaseLoseDistance: 15
   detectionRadius: 8
   attackDamage: 10
-  attackCooldown: 2
+  attackCooldown: 1
   idleAnimationName: Idle
   patrolAnimationName: Patrol
   chaseAnimationName: Chase

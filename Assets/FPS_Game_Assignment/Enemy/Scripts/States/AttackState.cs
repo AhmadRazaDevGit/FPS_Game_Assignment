@@ -49,7 +49,7 @@ public class AttackState : IState
         if (dist > d.chaseLoseDistance)
         {
             ClearTarget();
-            _context.SwitchState(_nextState); 
+            _context.SwitchState(_nextState);
             return;
         }
 
@@ -74,7 +74,7 @@ public class AttackState : IState
         _cooldownTimer -= Time.deltaTime;
         if (_cooldownTimer <= 0f)
         {
-            
+            _context.Animator.Play(d.attackAnimationName, -1, 0f);
             _cooldownTimer = d.attackCooldown;
         }
     }
