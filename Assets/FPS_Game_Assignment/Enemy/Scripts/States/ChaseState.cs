@@ -34,9 +34,11 @@ public class ChaseState : IState
         {
             _context.Agent.isStopped = false;
             _context.Agent.speed = d.chaseSpeed;
-            _context.Agent.stoppingDistance = d.patrolStoppingDistance;
+            // FIX: use chase stopping distance instead of patrol one
+            _context.Agent.stoppingDistance = d.chaseStoppingDistance;
         }
     }
+
 
     public void Tick()
     {
@@ -62,12 +64,10 @@ public class ChaseState : IState
                 _context.SwitchState(_nextState);
                 return;
             }
-
+            Debug.LogError(dist);
             // If near enough to stoppingDistance, we can stop/chose next state (e.g., attack or idle)
-            if (!_context.Agent.pathPending && dist <= (_context.Agent.stoppingDistance + 0.1f))
+            if (!_context.Agent.pathPending && dist <= (_context.Agent.stoppingDistance))
             {
-                // reached target (for this simple example we go to idle or attack later)
-                ClearTarget();
                 _context.SwitchState(_nextState);
             }
         }
@@ -75,7 +75,6 @@ public class ChaseState : IState
 
     public void Exit()
     {
-        ClearTarget();
-        if (_context.Agent != null) _context.Agent.isStopped = true;
+        
     }
 }

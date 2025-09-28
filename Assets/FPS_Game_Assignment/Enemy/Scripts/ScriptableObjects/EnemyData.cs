@@ -4,35 +4,40 @@ using UnityEngine;
 public class EnemyData : ScriptableObject
 {
     [Header("Movement")]
-
-    [Tooltip("Delay to stop in Idle state at start and after reached waypoint")]
+    [Tooltip("Delay in seconds the enemy stays idle before starting patrol.")]
     public float idleDelayTime = 1.5f;
-
-    [Tooltip("Speed of agent while patrolling (NavMeshAgent.speed)")]
+    [Tooltip("Movement speed while patrolling (units per second).")]
     public float patrolSpeed = 3.5f;
-
-    [Tooltip("Stopping distance used to detect arrival at waypoint")]
+    [Tooltip("Distance to a waypoint at which the enemy will consider itself 'arrived' while patrolling.")]
     public float patrolStoppingDistance = 0.5f;
 
     [Header("Chase")]
-    [Tooltip("Speed of agent while chasing the target")]
+    [Tooltip("Movement speed while chasing the target (units per second).")]
     public float chaseSpeed = 5f;
-
-    [Tooltip("If target distance grows beyond this value, target is considered lost")]
+    [Tooltip("Distance to the target at which the enemy will stop moving and perform close-range actions (e.g. attack).")]
+    public float chaseStoppingDistance = 1.2f;
+    [Tooltip("If the target moves farther than this distance, the enemy will give up chasing and return to patrol.")]
     public float chaseLoseDistance = 12f;
 
     [Header("Sensor")]
-
-    [Tooltip("Radius detection of collider")]
+    [Tooltip("Radius (in world units) used to detect potential targets (e.g. the player).")]
     public float detectionRadius = 10f;
 
+    [Header("Attack")]
+    [Tooltip("Damage applied to the target (optional, requires target to implement IDamageable/IHealth or TakeDamage).")]
+    public int attackDamage = 10;
+    [Tooltip("Seconds between consecutive attacks.")]
+    public float attackCooldown = 1.0f;
+
+
     [Header("Animation")]
-    [Tooltip("Animator trigger name for Idle animation")]
-    public string idleAnimationName= "Idle";
-
-    [Tooltip("Animator trigger name for Patrol animation")]
+    [Tooltip("Name of the idle animation/state used by the animator.")]
+    public string idleAnimationName = "Idle";
+    [Tooltip("Name of the patrol animation/state used by the animator.")]
     public string patrolAnimationName = "Patrol";
-
-    [Tooltip("Animator trigger name for Chase animation")]
+    [Tooltip("Name of the chase animation/state used by the animator.")]
     public string chaseAnimationName = "Chase";
+    [Tooltip("Name of the attack animation/state used by the animator.")]
+    public string attackAnimationName = "Attack";
 }
+

@@ -30,7 +30,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
     private IdleState _idleState;
     private PatrolState _patrolState;
     private ChaseState _chaseState;
-
+    private AttackState _attackState;
     private void Awake()
     {
         Animator = GetComponent<Animator>();
@@ -86,11 +86,12 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         _idleState = new IdleState(this);
         _patrolState = new PatrolState(this);
         _chaseState = new ChaseState(this);
-
+        _attackState = new AttackState(this);
         // wire transitions (set next states)
         _idleState.SetNextState(_patrolState);
         _patrolState.SetNextState(_idleState);
-        _chaseState.SetNextState(_idleState);
+        _chaseState.SetNextState(_attackState);
+        _attackState.SetNextState(_chaseState);
     }
 
     private void HandleTargetDetected(Transform target)
@@ -99,6 +100,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
 
         // Set target on chase state and switch to it
         _chaseState.SetTarget(target);
+        _attackState.SetTarget(target);
         SwitchState(_chaseState);
     }
 
@@ -108,6 +110,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         if (StateMachine.CurrentState == _chaseState)
         {
             _chaseState.ClearTarget();
+            _attackState.ClearTarget();
             SwitchState(_idleState);
         }
     }
