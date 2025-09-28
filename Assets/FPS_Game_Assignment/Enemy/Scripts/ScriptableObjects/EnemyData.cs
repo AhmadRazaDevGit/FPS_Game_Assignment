@@ -30,8 +30,7 @@ public class EnemyData : ScriptableObject
     public float attackCooldown = 1.0f;
 
     [Header("Hit / Stagger")]
-    [Tooltip("Name of the hit/recover animation state.")]
-    public string hitAnimationName = "Hit";
+  
     [Tooltip("Seconds to stay in HitState (fallback if animation length unknown).")]
     public float hitRecoveryTime = 0.6f;
 
@@ -44,5 +43,7 @@ public class EnemyData : ScriptableObject
     public string chaseAnimationName = "Chase";
     [Tooltip("Name of the attack animation/state used by the animator.")]
     public string attackAnimationName = "Attack";
+    [Tooltip("Name of the hit/recover animation state.")]
+    public string hitAnimationName = "Hit";
 }
 
