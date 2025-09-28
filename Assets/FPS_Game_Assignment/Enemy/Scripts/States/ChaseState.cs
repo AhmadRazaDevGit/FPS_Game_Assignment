@@ -64,9 +64,9 @@ public class ChaseState : IState
                 _context.SwitchState(_nextState);
                 return;
             }
-            Debug.LogError(dist);
+           
             // If near enough to stoppingDistance, we can stop/chose next state (e.g., attack or idle)
-            if (!_context.Agent.pathPending && dist <= (_context.Agent.stoppingDistance))
+            if (!_context.Agent.pathPending && dist <= (_context.Agent.stoppingDistance + 0.28f))
             {
                 _context.SwitchState(_nextState);
             }
@@ -75,6 +75,6 @@ public class ChaseState : IState
 
     public void Exit()
     {
-        
+
     }
 }

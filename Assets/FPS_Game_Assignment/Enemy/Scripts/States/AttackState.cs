@@ -53,7 +53,7 @@ public class AttackState : IState
         }
 
         // If target moved out of attack range, go back to chase
-        if (dist > (d.chaseStoppingDistance + 0.2f))
+        if (dist > (d.chaseStoppingDistance + 0.3f))
         {
             _context.SwitchState(_nextState); // _nextState should be ChaseState
             return;

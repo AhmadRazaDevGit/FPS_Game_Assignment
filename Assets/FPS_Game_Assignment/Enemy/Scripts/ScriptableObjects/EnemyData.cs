@@ -29,7 +29,6 @@ public class EnemyData : ScriptableObject
     [Tooltip("Seconds between consecutive attacks.")]
     public float attackCooldown = 1.0f;
 
-
     [Header("Animation")]
     [Tooltip("Name of the idle animation/state used by the animator.")]
     public string idleAnimationName = "Idle";
