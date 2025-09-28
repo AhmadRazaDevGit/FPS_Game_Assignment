@@ -21,11 +21,17 @@ public class HealthUI : MonoBehaviour
     private float displayedFill = 1f;
     private IHealth iHealth;
 
+    private EnemyHealth enemyHealth;
+
     void Start()
     {
         if (healthFill == null)
             Debug.LogWarning("HealthUI: healthFill is not assigned.", this);
         iHealth = healthObject.GetComponent<IHealth>();
+        enemyHealth = healthObject.GetComponent<EnemyHealth>();
+
+        if (enemyHealth != null)
+            enemyHealth.OnEnemyDeath += Died;
         if (iHealth != null)
         {
             // initialize UI
@@ -44,8 +50,13 @@ public class HealthUI : MonoBehaviour
     {
         if (iHealth != null)
             iHealth.OnHealthChanged -= OnHealthChanged;
+        if (enemyHealth != null)
+            enemyHealth.OnEnemyDeath -= Died;
     }
-
+    private void Died()
+    {
+        gameObject.SetActive(false);
+    }
 
     private void OnHealthChanged(float current, float max)
     {

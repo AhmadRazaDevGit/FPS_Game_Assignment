@@ -30,7 +30,7 @@ public class ChaseState : IState
                 _context.Animator.CrossFade(d.chaseAnimationName, 0.2f);
         }
 
-        if (_context.Agent != null)
+        if (_context.Agent != null && _context.Agent.isActiveAndEnabled)
         {
             _context.Agent.isStopped = false;
             _context.Agent.speed = d.chaseSpeed;
