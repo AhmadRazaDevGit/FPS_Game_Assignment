@@ -49,6 +49,7 @@ public class HealthUI : MonoBehaviour
 
     private void OnHealthChanged(float current, float max)
     {
+        healthText.text = $"{current}/{max}";
         float targetFill = max <= 0f ? 0f : Mathf.Clamp01(current / max);
         StopAllCoroutines();
         StartCoroutine(LerpFill(targetFill));
@@ -69,8 +70,8 @@ public class HealthUI : MonoBehaviour
 
     private void UpdateFillInstant(float current, float max)
     {
+        healthText.text = $"{current}/{max}";
         displayedFill = (max <= 0f) ? 0f : Mathf.Clamp01(current / max);
         if (healthFill != null) healthFill.fillAmount = displayedFill;
-        healthText.text = $"{current}/{max}";
     }
 }
