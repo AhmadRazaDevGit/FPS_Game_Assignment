@@ -1,5 +1,5 @@
+using System;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class PlayerHealth : HealthBase
 {
@@ -7,6 +7,8 @@ public class PlayerHealth : HealthBase
 
     private WeaponManager weaponManager;
     private RotationController rotationController;
+
+    public event Action OnPlayerDied;
     protected override void Awake()
     {
         base.Awake();
@@ -16,6 +18,7 @@ public class PlayerHealth : HealthBase
     }
     protected override void OnDeath(GameObject source)
     {
+        OnPlayerDied?.Invoke();
         playerMovement.enabled = false;
         weaponManager.enabled = false;
         rotationController.enabled = false;
