@@ -37,7 +37,7 @@ public class PatrolState : IState
         {
             _context.Agent.isStopped = false;
             _context.Agent.speed = d.patrolSpeed;
-            _context.Agent.stoppingDistance = d.stoppingDistance;
+            _context.Agent.stoppingDistance = d.patrolStoppingDistance;
         }
 
         // Immediately pick a target and move

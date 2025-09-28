@@ -14,6 +14,10 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
     [Tooltip("Waypoints list used for patrolling (pick random index each patrol).")]
     [SerializeField] protected List<Transform> waypoints;
 
+    [Header("Sensor")]
+    [Tooltip("Optional: assign an EnemySensor (child or same object). If left empty, the script will look for one in children.")]
+    [SerializeField] protected EnemySensor sensor;
+
     // Exposed to states via IEnemyContext
     public Animator Animator { get; private set; }
     public NavMeshAgent Agent { get; private set; }
@@ -25,17 +29,39 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
     public StateMachine StateMachine { get; private set; }
     private IdleState _idleState;
     private PatrolState _patrolState;
+    private ChaseState _chaseState;
 
     private void Awake()
     {
-        
         Animator = GetComponent<Animator>();
         Agent = GetComponent<NavMeshAgent>();
+        Transform = transform;
 
         StateMachine = new StateMachine();
 
+        // If sensor not assigned in inspector, try to find one in children (non-allocating GetComponent in Awake is fine)
+        if (sensor == null)
+            sensor = GetComponentInChildren<EnemySensor>();
+        sensor.ConfigureRadius(enemyData.detectionRadius);
         InitializeStates();
-   
+    }
+
+    private void OnEnable()
+    {
+        if (sensor != null)
+        {
+            sensor.OnDetected += HandleTargetDetected;
+            sensor.OnLost += HandleTargetLost;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (sensor != null)
+        {
+            sensor.OnDetected -= HandleTargetDetected;
+            sensor.OnLost -= HandleTargetLost;
+        }
     }
 
     private void Start()
@@ -55,16 +81,35 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         StateMachine.ChangeState(newState);
     }
 
-
     private void InitializeStates()
     {
-      
         _idleState = new IdleState(this);
         _patrolState = new PatrolState(this);
+        _chaseState = new ChaseState(this);
 
         // wire transitions (set next states)
         _idleState.SetNextState(_patrolState);
         _patrolState.SetNextState(_idleState);
+        _chaseState.SetNextState(_idleState);
+    }
+
+    private void HandleTargetDetected(Transform target)
+    {
+        if (target == null) return;
+
+        // Set target on chase state and switch to it
+        _chaseState.SetTarget(target);
+        SwitchState(_chaseState);
+    }
+
+    private void HandleTargetLost(Transform target)
+    {
+        // Only react if we were chasing
+        if (StateMachine.CurrentState == _chaseState)
+        {
+            _chaseState.ClearTarget();
+            SwitchState(_idleState);
+        }
     }
 
 #if UNITY_EDITOR
