@@ -99,7 +99,5 @@ public class AttackState : IState
 
     public void Exit()
     {
-        ClearTarget();
-        if (_context.Agent != null) _context.Agent.isStopped = false;
     }
 }
