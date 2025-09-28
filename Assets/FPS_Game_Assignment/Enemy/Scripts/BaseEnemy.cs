@@ -115,6 +115,10 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         _attackState.ClearTarget();
         SwitchState(_idleState);
     }
+    public void Attack()
+    {
+        _attackState?.DoAttack();
+    }
 
 #if UNITY_EDITOR
     // editor visualization to easily add waypoints in scene view

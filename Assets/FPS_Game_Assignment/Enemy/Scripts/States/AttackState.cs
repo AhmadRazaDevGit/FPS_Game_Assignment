@@ -4,10 +4,9 @@ public class AttackState : IState
 {
     private readonly IEnemyContext _context;
     private Transform _target;
-    private IState _nextState; // expected to be ChaseState (or Idle depending on wiring)
+    private IState _nextState;
     private float _cooldownTimer;
-
-    public string Name => "Attack";
+    private IHealth iHealth;
 
     public AttackState(IEnemyContext context)
     {
@@ -17,7 +16,9 @@ public class AttackState : IState
     public void SetNextState(IState next) => _nextState = next;
 
     // Called by BaseEnemy when target detected / assigned
-    public void SetTarget(Transform t) => _target = t;
+    public void SetTarget(Transform t) { _target = t; SetTargetHealth(_target.GetComponent<IHealth>()); }
+
+    public void SetTargetHealth(IHealth health) => iHealth = health;
 
     public void ClearTarget() => _target = null;
 
@@ -44,11 +45,11 @@ public class AttackState : IState
         var d = _context.EnemyData;
         var dist = Vector3.Distance(_context.Transform.position, _target.position);
 
-        // Lost target -> fallback (Idle or configured next)
+        // Lost target -> fallback (Idle)
         if (dist > d.chaseLoseDistance)
         {
             ClearTarget();
-            _context.SwitchState(_nextState); // BaseEnemy will normally redirect to Idle in HandleTargetLost
+            _context.SwitchState(_nextState); 
             return;
         }
 
@@ -59,7 +60,7 @@ public class AttackState : IState
             return;
         }
 
-        // Face target (optional; smooth rotation could be added)
+        // Face target
         var dir = (_target.position - _context.Transform.position);
         dir.y = 0f;
         if (dir.sqrMagnitude > 0.001f)
@@ -73,28 +74,20 @@ public class AttackState : IState
         _cooldownTimer -= Time.deltaTime;
         if (_cooldownTimer <= 0f)
         {
-            DoAttack();
+            
             _cooldownTimer = d.attackCooldown;
         }
     }
 
-    private void DoAttack()
+    public void DoAttack()
     {
         var dmg = _context.EnemyData.attackDamage;
-
-        var health = _target.GetComponentInParent<IHealth>();
-        if (health != null)
+        if (iHealth != null)
         {
-            health.TakeDamage(dmg);
+            iHealth.TakeDamage(dmg);
             return;
         }
 
-        //// Fallback: SendMessage (will not throw if method missing)
-        //_target.SendMessage("TakeDamage", dmg, SendMessageOptions.DontRequireReceiver);
-
-        // replay attack anim quickly (optional)
-        if (_context.Animator != null && !string.IsNullOrEmpty(_context.EnemyData.attackAnimationName))
-            _context.Animator.CrossFade(_context.EnemyData.attackAnimationName, 0.05f);
     }
 
     public void Exit()
