@@ -42,7 +42,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         // If sensor not assigned in inspector, try to find one in children (non-allocating GetComponent in Awake is fine)
         if (sensor == null)
             sensor = GetComponentInChildren<EnemySensor>();
-        sensor.ConfigureRadius(enemyData.detectionRadius);
+        
         InitializeStates();
     }
 
@@ -64,6 +64,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
 
     private void Start()
     {
+        sensor.ConfigureRadius(enemyData.detectionRadius);
         // start in Idle state
         StateMachine.ChangeState(_idleState);
     }

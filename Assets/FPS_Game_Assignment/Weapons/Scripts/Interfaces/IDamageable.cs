@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public interface IDamageable
@@ -7,5 +8,12 @@ public interface IDamageable
 
 public interface IHealth
 {
-    void TakeDamage(float amount);
+    float CurrentHealth { get; }
+    float MaxHealth { get; }
+    bool IsDead { get; }
+
+    event Action<float, float> OnHealthChanged;
+
+    void TakeDamage(float amount, GameObject source = null);
+    void Heal(float amount);
 }

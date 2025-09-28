@@ -1402,11 +1402,20 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5948826987863699, guid: 57a84f11a56e9694987076f99b2750a5, type: 3}
+      propertyPath: maxHealth
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 1685175400958271718, guid: 57a84f11a56e9694987076f99b2750a5,
         type: 3}
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 5678228489283400691, guid: 57a84f11a56e9694987076f99b2750a5,
+        type: 3}
+      propertyPath: healthObject
+      value: 
+      objectReference: {fileID: 1726789865889694125}
     - target: {fileID: 7484592272414631090, guid: 57a84f11a56e9694987076f99b2750a5,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1462,6 +1471,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 57a84f11a56e9694987076f99b2750a5, type: 3}
+--- !u!1 &1726789865889694125 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1685175400958271718, guid: 57a84f11a56e9694987076f99b2750a5,
+    type: 3}
+  m_PrefabInstance: {fileID: 1726789865889694124}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1755195663862521382
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,7 +5,7 @@ using UnityEngine;
 /// Attach to the Player root. Assign 'playerCamera' (child camera) and an input provider.
 /// </summary>
 [RequireComponent(typeof(Transform))]
-public class CameraController : MonoBehaviour
+public class RotationController : MonoBehaviour
 {
     [Header("Config (data-only)")]
     [SerializeField] private LookConfig lookConfig;
@@ -34,9 +34,9 @@ public class CameraController : MonoBehaviour
         _playerTransform = transform;
         _lookInputProvider = lookInputProviderComponent as ILookInputProvider;
         if (_lookInputProvider == null)
-            Debug.LogError($"[{nameof(CameraController)}] Look input provider missing or does not implement ILookInputProvider.", this);
+            Debug.LogError($"[{nameof(RotationController)}] Look input provider missing or does not implement ILookInputProvider.", this);
 
-        if (playerCamera == null) Debug.LogError($"[{nameof(CameraController)}] playerCamera is not assigned.", this);
+        if (playerCamera == null) Debug.LogError($"[{nameof(RotationController)}] playerCamera is not assigned.", this);
 
         // initialize angles from current transforms
         Vector3 euler = _playerTransform.eulerAngles;
