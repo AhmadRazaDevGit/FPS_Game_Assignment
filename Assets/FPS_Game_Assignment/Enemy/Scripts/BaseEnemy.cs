@@ -27,12 +27,12 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
 
     // State machine & states
     public StateMachine StateMachine { get; private set; }
-    private IdleState _idleState;
-    private PatrolState _patrolState;
-    private ChaseState _chaseState;
-    private AttackState _attackState;
-    private HitState _hitState;
-    private void Awake()
+    protected IdleState _idleState;
+    protected PatrolState _patrolState;
+    protected ChaseState _chaseState;
+    protected AttackState _attackState;
+    protected HitState _hitState;
+    protected virtual void Awake()
     {
         Animator = GetComponent<Animator>();
         Agent = GetComponent<NavMeshAgent>();
@@ -47,7 +47,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         InitializeStates();
     }
 
-    private void OnEnable()
+    protected virtual void OnEnable()
     {
         if (sensor != null)
         {
@@ -55,7 +55,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         }
     }
 
-    private void OnDisable()
+    protected virtual void OnDisable()
     {
         if (sensor != null)
         {
@@ -63,25 +63,25 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         }
     }
 
-    private void Start()
+    protected virtual void Start()
     {
         sensor.ConfigureRadius(enemyData.detectionRadius);
         // start in Idle state
         StateMachine.ChangeState(_idleState);
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         StateMachine.Tick();
     }
 
     // IEnemyContext implementation for states to call
-    public void SwitchState(IState newState)
+    public virtual void SwitchState(IState newState)
     {
         StateMachine.ChangeState(newState);
     }
 
-    private void InitializeStates()
+    protected virtual void InitializeStates()
     {
         _idleState = new IdleState(this);
         _patrolState = new PatrolState(this);
@@ -96,7 +96,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         _attackState.SetNextState(_chaseState);
     }
 
-    private void HandleTargetDetected(Transform target)
+    protected virtual void HandleTargetDetected(Transform target)
     {
         if (target == null) return;
 
@@ -106,12 +106,12 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         SwitchState(_chaseState);
     }
 
-    public void NotifyTargetLost(Transform target)
+    public virtual void NotifyTargetLost(Transform target)
     {
         HandleTargetLost(target);
     }
 
-    private void HandleTargetLost(Transform target)
+    protected virtual void HandleTargetLost(Transform target)
     {
         if (target == null) return;
         _chaseState.ClearTarget();
@@ -119,11 +119,11 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         SwitchState(_idleState);
     }
 
-    public void OnHit()
+    public virtual void OnHit()
     {
         SwitchState(_hitState);
     }
-    public void Attack()
+    public virtual void Attack()
     {
         _attackState?.DoAttack();
     }
