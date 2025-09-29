@@ -16,7 +16,7 @@ MonoBehaviour:
   patrolSpeed: 0.6
   patrolStoppingDistance: 0.5
   chaseSpeed: 0.9
-  chaseStoppingDistance: 1
+  chaseStoppingDistance: 1.5
   chaseLoseDistance: 15
   detectionRadius: 8
   attackDamage: 10
