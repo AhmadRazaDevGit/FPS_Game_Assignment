@@ -25,7 +25,7 @@ MonoBehaviour:
   muzzleLocalPosition: {x: 0, y: 0, z: 0.2}
   projectileSpeed: 120
   projectileLifetime: 2
-  damage: 28
+  damage: 5
   hitMask:
     serializedVersion: 2
     m_Bits: 25
