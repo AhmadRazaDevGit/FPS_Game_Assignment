@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: Pistol
   magazineSize: 12
-  spareAmmo: 36
+  spareAmmo: 108
   reloadTime: 1.2
   fireMode: 0
   roundsPerMinute: 300
