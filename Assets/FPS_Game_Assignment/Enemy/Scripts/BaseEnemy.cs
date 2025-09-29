@@ -41,8 +41,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         Animator = GetComponent<Animator>();
         Agent = GetComponent<NavMeshAgent>();
         Transform = transform;
-        WayPoint wayPoint = FindAnyObjectByType<WayPoint>();
-        if (wayPoint != null) { waypoints = wayPoint.wayPoints; }
+        AssignWayPoints();
         StateMachine = new StateMachine();
 
 
@@ -53,7 +52,12 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
 
         InitializeStates();
     }
-
+    protected void AssignWayPoints()
+    {
+        WayPoint wayPoint = FindAnyObjectByType<WayPoint>();
+        if (wayPoint != null) { waypoints = wayPoint.wayPoints; }
+        else { Debug.LogWarning("No waypoints in the scene Ai will patrol move"); }
+    }
     protected virtual void OnEnable()
     {
         if (sensor != null)
