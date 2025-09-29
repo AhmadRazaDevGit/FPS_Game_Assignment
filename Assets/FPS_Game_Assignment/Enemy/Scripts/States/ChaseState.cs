@@ -49,7 +49,7 @@ public class ChaseState : IState
         }
 
         // Move towards target every frame
-        if (_context.Agent != null)
+        if (_context.Agent != null && _context.Agent.isActiveAndEnabled)
         {
             _context.Agent.SetDestination(_target.position);
 

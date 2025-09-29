@@ -703,10 +703,10 @@ MonoBehaviour:
   enemies:
   - prefab: {fileID: 7153101908330999719, guid: a2008c3f50949a04b9d4158321b40d5a,
       type: 3}
-    amount: 2
+    amount: 3
     spawnPoint: {fileID: 1412113361}
   spawnOnStart: 1
-  delayBetweenSpawns: 3
+  delayBetweenSpawns: 4
 --- !u!4 &1216521363
 Transform:
   m_ObjectHideFlags: 0
