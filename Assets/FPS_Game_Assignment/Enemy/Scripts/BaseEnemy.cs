@@ -103,6 +103,11 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         _hitState = new HitState(this);
         _dieState = new DieState(this);
 
+        SetNextState();
+    }
+
+    protected virtual void SetNextState()
+    {
         // wire transitions (set next states)
         _idleState.SetNextState(_patrolState);
         _patrolState.SetNextState(_idleState);
@@ -158,7 +163,12 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
             StateMachine.ChangeState(_idleState);
         }
     }
+    public void ScheduleHide(float seconds) { Agent.enabled = false;Invoke(nameof(Hide), seconds); }
 
+    protected void Hide()
+    {
+        gameObject.SetActive(false);
+    }
 #if UNITY_EDITOR
     // editor visualization to easily add waypoints in scene view
     private void OnDrawGizmosSelected()

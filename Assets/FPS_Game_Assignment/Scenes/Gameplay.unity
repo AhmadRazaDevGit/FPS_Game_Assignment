@@ -411,7 +411,7 @@ MonoBehaviour:
     amount: 2
     spawnPoint: {fileID: 1412113361}
   spawnOnStart: 1
-  delayBetweenSpawns: 1
+  delayBetweenSpawns: 3
 --- !u!4 &1216521363
 Transform:
   m_ObjectHideFlags: 0

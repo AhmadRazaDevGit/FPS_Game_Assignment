@@ -22,6 +22,7 @@ MonoBehaviour:
   attackDamage: 10
   attackCooldown: 1
   hitRecoveryTime: 0.3
+  hideAfterDeath: 4
   idleAnimationName: Idle
   patrolAnimationName: Patrol
   chaseAnimationName: Chase

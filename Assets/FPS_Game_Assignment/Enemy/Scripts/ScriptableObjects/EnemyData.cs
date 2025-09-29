@@ -34,6 +34,10 @@ public class EnemyData : ScriptableObject
     [Tooltip("Seconds to stay in HitState (fallback if animation length unknown).")]
     public float hitRecoveryTime = 0.6f;
 
+    [Header("Death")]
+    [Tooltip("Seconds to hide/disable after dying (animation or cleanup time).")]
+    public float hideAfterDeath = 2f;
+
     [Header("Animation")]
     [Tooltip("Name of the idle animation/state used by the animator.")]
     public string idleAnimationName = "Idle";

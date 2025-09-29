@@ -19,7 +19,5 @@ public class EnemyHealth : HealthBase
     protected override void OnDeath(GameObject source)
     {
         OnEnemyDeath?.Invoke();
-        baseEnemy.Agent.enabled = false;
-        //baseEnemy.enabled = false;
     }
 }

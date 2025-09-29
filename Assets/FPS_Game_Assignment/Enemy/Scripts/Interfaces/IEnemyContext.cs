@@ -18,4 +18,6 @@ public interface IEnemyContext
 
     void RevertToPreviousState();
 
+    void ScheduleHide(float seconds);
+
 }
