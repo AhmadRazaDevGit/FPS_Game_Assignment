@@ -1,13 +1,11 @@
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class PatrolState : IState
 {
     private readonly IEnemyContext _context;
     private IState _nextState; // usually IdleState
     private int _currentWaypointIndex = -1;
-    private readonly List<Transform> _waypoints;
+    private readonly Transform[] _waypoints;
 
     public string Name => "Patrol";
 
@@ -46,7 +44,7 @@ public class PatrolState : IState
 
     public void Tick()
     {
-        if (_waypoints == null || _waypoints.Count == 0)
+        if (_waypoints == null || _waypoints.Length == 0)
         {
             _nextState?.Exit();
             _context.SwitchState(_nextState);
@@ -87,16 +85,16 @@ public class PatrolState : IState
 
     private void TrySetRandomWaypointDestination()
     {
-        if (_waypoints == null || _waypoints.Count == 0) return;
+        if (_waypoints == null || _waypoints.Length == 0) return;
 
-        int nextIndex = Random.Range(0, _waypoints.Count);
+        int nextIndex = Random.Range(0, _waypoints.Length);
         // Avoid repeating the same waypoint consecutively when possible
-        if (_waypoints.Count > 1)
+        if (_waypoints.Length > 1)
         {
             int tries = 0;
             while (nextIndex == _currentWaypointIndex && tries++ < 5)
             {
-                nextIndex = Random.Range(0, _waypoints.Count);
+                nextIndex = Random.Range(0, _waypoints.Length);
             }
         }
 

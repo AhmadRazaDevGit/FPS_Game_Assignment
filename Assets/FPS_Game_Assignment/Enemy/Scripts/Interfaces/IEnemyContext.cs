@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -12,7 +11,7 @@ public interface IEnemyContext
     EnemyData EnemyData { get; }
     NavMeshAgent Agent { get; }
     Transform Transform { get; }
-    List<Transform> Waypoints { get; }
+    Transform[] Waypoints { get; }
     void SwitchState(IState newState);
 
     void NotifyTargetLost(Transform target);

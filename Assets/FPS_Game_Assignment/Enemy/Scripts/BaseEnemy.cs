@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -12,7 +11,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
 
     [Header("Waypoints")]
     [Tooltip("Waypoints list used for patrolling (pick random index each patrol).")]
-    [SerializeField] protected List<Transform> waypoints;
+    [SerializeField] protected Transform[] waypoints;
 
     [Header("Sensor")]
     [Tooltip("Optional: assign an EnemySensor (child or same object). If left empty, the script will look for one in children.")]
@@ -26,7 +25,8 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
     public NavMeshAgent Agent { get; private set; }
     public EnemyData EnemyData => enemyData;
     public Transform Transform { get; private set; }
-    public List<Transform> Waypoints => waypoints;
+    public Transform[] Waypoints { get => waypoints; set => waypoints = value; }
+
 
     // State machine & states
     public StateMachine StateMachine { get; private set; }
@@ -41,7 +41,8 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
         Animator = GetComponent<Animator>();
         Agent = GetComponent<NavMeshAgent>();
         Transform = transform;
-
+        WayPoint wayPoint = FindAnyObjectByType<WayPoint>();
+        if (wayPoint != null) { waypoints = wayPoint.wayPoints; }
         StateMachine = new StateMachine();
 
 
@@ -107,7 +108,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
 
     private void GoToDieState()
     {
-        SwitchState(_dieState);  
+        SwitchState(_dieState);
     }
 
     protected virtual void HandleTargetDetected(Transform target)
