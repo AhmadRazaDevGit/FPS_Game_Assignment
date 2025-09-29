@@ -1,7 +1,7 @@
 public class DieState : IState
 {
     private readonly IEnemyContext _context;
-    private bool _isActive;
+
 
     public DieState(IEnemyContext context)
     {
@@ -10,7 +10,6 @@ public class DieState : IState
 
     public void Enter()
     {
-        _isActive = true;
 
         // stop navmesh movement
         if (_context.Agent != null && _context.Agent.isActiveAndEnabled)
