@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class PlayerHealth : HealthBase
@@ -8,7 +7,8 @@ public class PlayerHealth : HealthBase
     private WeaponManager weaponManager;
     private RotationController rotationController;
 
-    public event Action OnPlayerDied;
+    [Tooltip("Raise when player died to active the game (SO to decouple")]
+    [SerializeField] GameEventWithBool OnPlayerDied;
     protected override void Awake()
     {
         base.Awake();
@@ -18,7 +18,7 @@ public class PlayerHealth : HealthBase
     }
     protected override void OnDeath(GameObject source)
     {
-        OnPlayerDied?.Invoke();
+        OnPlayerDied?.Raise(false);
         playerMovement.enabled = false;
         weaponManager.enabled = false;
         rotationController.enabled = false;

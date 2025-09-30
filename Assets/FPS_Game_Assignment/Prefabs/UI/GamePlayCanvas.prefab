@@ -404,8 +404,8 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 5367067244357987669}
   - {fileID: 3440031359351772504}
+  - {fileID: 5367067244357987669}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -488,3 +488,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b19cb8719632b1444b6ba8ab1b311e54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  OnPlayerDied: {fileID: 11400000, guid: 4e8bc0157cf371c45baed746bef45103, type: 2}
+  failPanel: {fileID: 5042972168610862233}
