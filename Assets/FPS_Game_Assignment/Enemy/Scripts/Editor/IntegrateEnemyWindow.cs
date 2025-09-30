@@ -188,19 +188,19 @@ public class {className} : BaseEnemy
         // Add the generated enemy script as component (if the type exists after import)
         Type enemyType = FindTypeByName(className);
         Component enemyComponent = null;
-        if (enemyType != null && enemyType.IsSubclassOf(typeof(MonoBehaviour)))
-        {
+        //if (enemyType != null && enemyType.IsSubclassOf(typeof(MonoBehaviour)))
+        //{
             enemyComponent = Undo.AddComponent(root, enemyType);
-        }
-        else
-        {
-            // fallback: try to add BaseEnemy
-            Type baseEnemyType = FindTypeByName("BaseEnemy");
-            if (baseEnemyType != null)
-                enemyComponent = Undo.AddComponent(root, baseEnemyType);
-            else
-                Debug.LogWarning("Could not find generated enemy type or BaseEnemy type to attach. You will need to attach manually.");
-        }
+        //}
+        //else
+        //{
+        //    // fallback: try to add BaseEnemy
+        //    Type baseEnemyType = FindTypeByName("BaseEnemy");
+        //    if (baseEnemyType != null)
+        //        enemyComponent = Undo.AddComponent(root, baseEnemyType);
+        //    else
+        //        Debug.LogWarning("Could not find generated enemy type or BaseEnemy type to attach. You will need to attach manually.");
+        //}
 
         // Create EnemyData ScriptableObject asset
         Type enemyDataType = FindTypeByName("EnemyData");
