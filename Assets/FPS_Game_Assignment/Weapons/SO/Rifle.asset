@@ -28,7 +28,7 @@ MonoBehaviour:
   damage: 5
   hitMask:
     serializedVersion: 2
-    m_Bits: 25
+    m_Bits: 153
   fireClip: {fileID: 8300000, guid: 52b0105f8b697764daeb353abbfd4536, type: 3}
   realodClip: {fileID: 8300000, guid: c2a575dc89243aa45aeb9f9bdb940a3c, type: 3}
   emptyClip: {fileID: 8300000, guid: 5785de5c92f1c6c47a83cc597f18a463, type: 3}

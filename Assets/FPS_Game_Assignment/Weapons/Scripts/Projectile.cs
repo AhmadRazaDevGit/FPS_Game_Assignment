@@ -44,6 +44,7 @@ public class Projectile : MonoBehaviour
 
     private void OnHit(RaycastHit hit)
     {
+        //Debug.LogWarning($"Hit: {hit.collider.gameObject.name} layer:{LayerMask.LayerToName(hit.collider.gameObject.layer)}");
         // Try to apply damage
         var damageable = hit.collider.GetComponentInParent<IHealth>();
         if (damageable != null)
