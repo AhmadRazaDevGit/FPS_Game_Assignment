@@ -43,4 +43,12 @@ public class WeaponData : ScriptableObject
     [Header("Misc")]
     [Tooltip("Layer mask for what projectiles can hit.")]
     public LayerMask hitMask = ~0;
+
+    [Header("SFX")]
+    [Tooltip("Fire sound clip")]
+    public AudioClip fireClip;
+    [Tooltip("Reload sound clip")]
+    public AudioClip realodClip;
+    [Tooltip("Empty magzine sound clip")]
+    public AudioClip emptyClip;
 }

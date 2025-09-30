@@ -60,6 +60,9 @@ public abstract class WeaponBase : MonoBehaviour
         if (currentAmmo >= data.magazineSize) return; // nothing to reload
         if (spareAmmo <= 0) return; // no spare ammo
 
+        if (data.realodClip)
+            _audio.PlayOneShot(data.realodClip);
+
         StartCoroutine(ReloadProcess());
     }
 
@@ -203,12 +206,14 @@ public abstract class WeaponBase : MonoBehaviour
 
     protected virtual void OnFireEffects()
     {
-        if (_audio && _audio.clip) _audio.PlayOneShot(_audio.clip);
+        if (data.fireClip)
+            _audio.PlayOneShot(data.fireClip);
     }
 
     protected virtual void OnEmpty()
     {
-        // click sound or UI hint
+        if (data.emptyClip)
+            _audio.PlayOneShot(data.emptyClip);
     }
 
     // quick accessors

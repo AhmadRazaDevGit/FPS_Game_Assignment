@@ -15,7 +15,7 @@ MonoBehaviour:
   weaponName: Pistol
   magazineSize: 12
   spareAmmo: 108
-  reloadTime: 1.2
+  reloadTime: 1
   fireMode: 0
   roundsPerMinute: 300
   burstCount: 3
@@ -29,3 +29,6 @@ MonoBehaviour:
   hitMask:
     serializedVersion: 2
     m_Bits: 25
+  fireClip: {fileID: 8300000, guid: 100f9ac75684f784b90e982db6a41feb, type: 3}
+  realodClip: {fileID: 8300000, guid: 189ad7a28ae6f7e46b5f46506fbf4588, type: 3}
+  emptyClip: {fileID: 8300000, guid: 2d6f26192c7fbd54c846524e92cdbcc5, type: 3}
