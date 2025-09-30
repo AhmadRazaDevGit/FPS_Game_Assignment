@@ -176,6 +176,7 @@ public abstract class WeaponBase : MonoBehaviour
             return;
         }
 
+        OnFireEffects();
         Vector3 dir = CalculateSpreadDirection(muzzleTransform.forward, data.spreadAngle);
 
         GameObject projGo = projectilePool.Get();
@@ -188,7 +189,6 @@ public abstract class WeaponBase : MonoBehaviour
         currentAmmo--;
 
         AmmoChanged?.Invoke(currentAmmo, spareAmmo);
-        OnFireEffects();
     }
 
     protected Vector3 CalculateSpreadDirection(Vector3 forward, float spreadAngleDeg)
