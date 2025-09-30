@@ -369,11 +369,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05d2d730c711a8848afcc263992d0700, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemies:
-  - prefab: {fileID: 7153101908330999719, guid: a2008c3f50949a04b9d4158321b40d5a,
-      type: 3}
-    amount: 3
-    spawnPoint: {fileID: 1412113361}
+  enemiesPrefab: {fileID: 11400000, guid: 96e0754f7c3ca7e42911888f5703dff7, type: 2}
   spawnOnStart: 1
   delayBetweenSpawns: 4
 --- !u!4 &1216521363
