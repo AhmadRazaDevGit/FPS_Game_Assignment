@@ -18,8 +18,9 @@ public class IntegrateWeaponWindow : EditorWindow
     private const string scriptsFolder = "Assets/FPS_Game_Assignment/Weapons/Scripts/Guns";
     private const string soFolder = "Assets/FPS_Game_Assignment/Weapons/SO";
     private const string bulletsPath = "Assets/FPS_Game_Assignment/Weapons/Prefabs/Bullets/RifleBullet.prefab";
+    private const string sessionKey = "IntegrateWeaponWindow.Pending";
 
-    // Keep minimal pending info to finish after assembly reload
+    // Keep minimal pending info to finish after assembly reload (also persisted via SessionState)
     private static PendingIntegration pending;
 
     [MenuItem("FPSGame/Integrate Weapon")]
@@ -212,40 +213,55 @@ public class IntegrateWeaponWindow : EditorWindow
 
         // Because we created a new script we need to wait for compilation before attaching it.
         // Save a pending record so the post-compile step knows what to do.
+        var gid = UnityEditor.GlobalObjectId.GetGlobalObjectIdSlow(rootGO);
         pending = new PendingIntegration
         {
             scriptClassName = baseName,
-            rootInstanceID = rootGO.GetInstanceID(),
+            rootGlobalId = gid.ToString(),
             soAssetPath = soPath,
             muzzleName = "MuzzleEffect",
             bulletPrefabPath = bulletsPath,
             poolObjectName = "Object Pool"
         };
+        // Persist across domain reloads
+        SessionState.SetString(sessionKey, JsonUtility.ToJson(pending));
 
-        // Register callback to be executed after assembly reload (compilation)
-        AssemblyReloadEvents.afterAssemblyReload -= OnAfterAssemblyReload; // ensure not added multiple times
-        AssemblyReloadEvents.afterAssemblyReload += OnAfterAssemblyReload;
-
-        statusMessage = $"Created files & scene objects. Finalizing after script compile (Unity will compile assets now).";
+        statusMessage = $"Created files & scene objects. Waiting for compile to attach '{baseName}' to root.";
         Debug.Log(statusMessage);
     }
 
-    // Called after assemblies are reloaded (post-compile)
-    private static void OnAfterAssemblyReload()
+    // Run after reloads to complete any pending integration
+    [InitializeOnLoadMethod]
+    private static void AutoFinalizeAfterReload()
     {
-        if (pending == null)
+        TryFinalizePending();
+    }
+
+    private static void TryFinalizePending()
+    {
+        // Load from session first; fall back to static
+        var json = SessionState.GetString(sessionKey, string.Empty);
+        if (!string.IsNullOrEmpty(json))
         {
-            return;
+            pending = JsonUtility.FromJson<PendingIntegration>(json);
         }
+        if (pending == null)
+            return;
 
         try
         {
-            // Find the root GO by InstanceID
-            GameObject root = EditorUtility.InstanceIDToObject(pending.rootInstanceID) as GameObject;
+            // Resolve root GameObject via GlobalObjectId
+            GameObject root = null;
+            if (!string.IsNullOrEmpty(pending.rootGlobalId) && UnityEditor.GlobalObjectId.TryParse(pending.rootGlobalId, out var gid))
+            {
+                var obj = UnityEditor.GlobalObjectId.GlobalObjectIdentifierToObjectSlow(gid);
+                root = obj as GameObject;
+            }
             if (root == null)
             {
-                Debug.LogError("Pending integration failed: couldn't find created GameObject in scene.");
+                Debug.LogError("Pending weapon integration failed: could not locate the created root GameObject.");
                 pending = null;
+                SessionState.EraseString(sessionKey);
                 return;
             }
 
@@ -272,40 +288,27 @@ public class IntegrateWeaponWindow : EditorWindow
                 if (comp != null)
                 {
                     SerializedObject compSo = new SerializedObject(comp);
-                    // Try common field names
                     var soProp = compSo.FindProperty("data") ?? compSo.FindProperty("weaponData") ?? compSo.FindProperty("weapon") ?? compSo.FindProperty("weaponDataAsset");
                     if (soProp != null)
                     {
                         soProp.objectReferenceValue = soObj;
                         compSo.ApplyModifiedProperties();
-                        Debug.Log("Assigned WeaponData asset to component.");
                     }
-                    else
-                    {
-                        Debug.LogWarning("Could not find a field to assign WeaponData on the weapon component (tried data/weaponData/weapon/weaponDataAsset). Set it manually if necessary.");
-                    }
-
                     // Assign muzzleTransform if a field exists
                     var muzzleObj = FindChildByName(root.transform, pending.muzzleName);
                     if (muzzleObj != null)
                     {
-                        SerializedObject compSo2 = compSo;
-                        var muzzleProp = compSo2.FindProperty("muzzleTransform") ?? compSo2.FindProperty("muzzle") ?? compSo2.FindProperty("muzzlePoint");
+                        var muzzleProp = compSo.FindProperty("muzzleTransform") ?? compSo.FindProperty("muzzle") ?? compSo.FindProperty("muzzlePoint");
                         if (muzzleProp != null)
                         {
                             muzzleProp.objectReferenceValue = muzzleObj.transform;
-                            compSo2.ApplyModifiedProperties();
-                            Debug.Log("Assigned muzzleTransform on weapon component.");
-                        }
-                        else
-                        {
-                            Debug.LogWarning("Could not find a muzzleTransform field on the weapon component (tried muzzleTransform/muzzle/muzzlePoint). Set it manually if necessary.");
+                            compSo.ApplyModifiedProperties();
                         }
                     }
                 }
             }
 
-            // 3) Assign bullet prefab to pool if possible (again try to find pool component & property)
+            // 3) Assign bullet prefab to pool if possible
             GameObject poolGO = FindChildByName(root.transform, pending.poolObjectName);
             if (poolGO != null)
             {
@@ -319,26 +322,24 @@ public class IntegrateWeaponWindow : EditorWindow
                         var bulletPrefab = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(pending.bulletPrefabPath);
                         prop.objectReferenceValue = bulletPrefab;
                         poolSo.ApplyModifiedProperties();
-                        Debug.Log("Assigned RifleBullet to ObjectPool.prefab");
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Could not find 'prefab' property on ObjectPool; assign RifleBullet manually.");
                     }
                 }
             }
 
-            // Clear pending
+            Selection.activeGameObject = root;
+            EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+            AssetDatabase.SaveAssets();
+
+            // Clear pending (both memory and session)
             pending = null;
-            // remove callback
-            AssemblyReloadEvents.afterAssemblyReload -= OnAfterAssemblyReload;
+            SessionState.EraseString(sessionKey);
             Debug.Log("Weapon integration finalization complete.");
         }
         catch (Exception ex)
         {
             Debug.LogException(ex);
             pending = null;
-            AssemblyReloadEvents.afterAssemblyReload -= OnAfterAssemblyReload;
+            SessionState.EraseString(sessionKey);
         }
     }
 
@@ -414,7 +415,7 @@ public class {className} : WeaponBase
     private class PendingIntegration
     {
         public string scriptClassName;
-        public int rootInstanceID;
+        public string rootGlobalId;
         public string soAssetPath;
         public string muzzleName;
         public string bulletPrefabPath;
