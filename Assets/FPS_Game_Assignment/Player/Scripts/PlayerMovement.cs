@@ -182,7 +182,7 @@ public class PlayerMovement : MonoBehaviour
         }
         else if (input.Jump && !canJump)
         {
-            Debug.Log($"[PlayerMovement] Jump input received but cannot jump. Grounded: {_isGrounded}, WasGrounded: {_wasGroundedLastFrame}, Crouch: {input.Crouch}", this);
+            //Debug.Log($"[PlayerMovement] Jump input received but cannot jump. Grounded: {_isGrounded}, WasGrounded: {_wasGroundedLastFrame}, Crouch: {input.Crouch}", this);
         }
     }
 

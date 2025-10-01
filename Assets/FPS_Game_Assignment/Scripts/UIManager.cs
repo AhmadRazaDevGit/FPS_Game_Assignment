@@ -16,7 +16,7 @@ public class UIManager : MonoBehaviour
 
     private void OnDisable()
     {
-        OnPlayerDied.OnEventRaised += DisplayStatus;
+        OnPlayerDied.OnEventRaised -= DisplayStatus;
     }
 
 }

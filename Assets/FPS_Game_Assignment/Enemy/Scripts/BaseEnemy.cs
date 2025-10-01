@@ -54,6 +54,7 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext
     }
     protected void AssignWayPoints()
     {
+        //Scene LookUp
         WayPoint wayPoint = FindAnyObjectByType<WayPoint>();
         if (wayPoint != null) { waypoints = wayPoint.wayPoints; }
         else { Debug.LogWarning("No waypoints in the scene Ai will patrol move"); }
