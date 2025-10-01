@@ -111,9 +111,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   weaponHolder: {fileID: 467239624483013633}
-  weaponPrefabs:
-  - {fileID: 4744677183645488969, guid: 261d374cd022b2e4ba9c31e9ae16ce4e, type: 3}
-  - {fileID: 4744677183645488969, guid: 09fa9cd1c21e60448bd124ac169c1e34, type: 3}
+  weapon: {fileID: 11400000, guid: def71131221c5494db2e0812ad81212d, type: 2}
 --- !u!114 &5948826987863699
 MonoBehaviour:
   m_ObjectHideFlags: 0

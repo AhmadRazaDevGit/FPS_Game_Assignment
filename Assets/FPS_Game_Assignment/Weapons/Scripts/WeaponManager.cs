@@ -12,8 +12,9 @@ public class WeaponManager : MonoBehaviour
     [Tooltip("Weapon holder transform (child of camera/player).")]
     public Transform weaponHolder;
 
-    [Tooltip("Weapon prefabs (prefab with a WeaponBase-derived component).")]
-    public List<GameObject> weaponPrefabs;
+    [SerializeField] Weapons weapon;
+
+    private GameObject[] weaponPrefabs;
 
     private List<WeaponBase> _instantiated = new List<WeaponBase>();
     private int _currentIndex = -1;
@@ -21,6 +22,7 @@ public class WeaponManager : MonoBehaviour
     public event Action<WeaponBase> OnWeaponEquipped;
     private void Start()
     {
+        weaponPrefabs = weapon.weapons;
         // instantiate all weapons but disable them. This lets us switch quickly.
         foreach (var prefab in weaponPrefabs)
         {
