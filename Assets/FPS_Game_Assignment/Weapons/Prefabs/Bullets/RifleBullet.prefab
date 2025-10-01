@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8324452827775562265}
   - component: {fileID: 2238461858394663846}
   - component: {fileID: 470019128360697787}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: RifleBullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -80,7 +80,7 @@ GameObject:
   - component: {fileID: 8710822915715583612}
   - component: {fileID: 2641349518459925256}
   - component: {fileID: 2272693778877017040}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Bullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
