@@ -3,7 +3,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "WeaponData_", menuName = "Weapon/Weapon Data", order = 1)]
 public class WeaponData : ScriptableObject
 {
-    public enum FireMode { SemiAuto, FullAuto, Burst }
+    public enum FireMode { SemiAuto, FullAuto}
 
 
     [Header("Identity")]

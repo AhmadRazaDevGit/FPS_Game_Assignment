@@ -28,13 +28,13 @@ public abstract class WeaponBase : MonoBehaviour
 
     // Reloading state & events
     public bool IsReloading { get; private set; } = false;
-    /// <summary>Normalized [0..1] reload progress event.</summary>
+
     public event Action<float> ReloadProgressChanged;
-    /// <summary>Fired when reload starts.</summary>
+
     public event Action ReloadStarted;
-    /// <summary>Fired when reload completes or is aborted.</summary>
+    
     public event Action ReloadCompleted;
-    /// <summary>Raised whenever the current magazine or spare ammo changes.</summary>
+  
     public event Action<int, int> AmmoChanged;
     protected virtual void Awake()
     {
@@ -103,7 +103,7 @@ public abstract class WeaponBase : MonoBehaviour
         transform.localRotation = localRot;
         gameObject.SetActive(true);
 
-        // push ammo state when equipped (UI will subscribe via WeaponManager.OnWeaponEquipped)
+       
         AmmoChanged?.Invoke(currentAmmo, spareAmmo);
     }
 
@@ -144,19 +144,6 @@ public abstract class WeaponBase : MonoBehaviour
                 {
                     FireOne();
                     yield return new WaitForSeconds(_timeBetweenShots);
-                }
-                break;
-
-            case WeaponData.FireMode.Burst:
-                while (_isFiring)
-                {
-                    for (int i = 0; i < data.burstCount; i++)
-                    {
-                        if (!_isFiring) break;
-                        FireOne();
-                        yield return new WaitForSeconds(_timeBetweenShots);
-                    }
-                    _isFiring = false;
                 }
                 break;
         }
