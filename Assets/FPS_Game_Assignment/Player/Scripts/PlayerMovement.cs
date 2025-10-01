@@ -4,7 +4,7 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     #region Config & Dependencies
-    [Header("Config (data-only)")]
+    [Header("Config (SO-Properties)")]
     [SerializeField] private MovementConfig movementConfig;
 
     [Header("Dependencies")]
@@ -17,11 +17,9 @@ public class PlayerMovement : MonoBehaviour
     [Tooltip("Camera will be moved down/up with crouch")]
     [SerializeField] private Transform playerCamera;
 
-    [SerializeField, Tooltip("Capsule height when not crouched. If zero, will use CharacterController.height as default")]
-    private float standingHeight = 0f;
+   
+    private float standingHeight;
 
-    [SerializeField, Tooltip("CharacterController radius override (0 to use existing)")]
-    private float controllerRadius = 0f;
     #endregion
 
     #region Settings
@@ -105,13 +103,11 @@ public class PlayerMovement : MonoBehaviour
 
         _inputProvider = inputProviderComponent as IInputProvider;
         if (_inputProvider == null) Debug.LogError($"[{nameof(PlayerMovement)}] Input provider does not implement IInputProvider.", this);
-
-        if (controllerRadius > 0f) _controller.radius = controllerRadius;
     }
 
     private void InitializeHeightsAndCamera()
     {
-        if (standingHeight <= 0f) standingHeight = _controller.height;
+        standingHeight = _controller.height;
 
         // init heights
         _currentHeight = standingHeight;
