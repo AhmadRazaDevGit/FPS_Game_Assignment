@@ -80,8 +80,6 @@ MonoBehaviour:
   movementConfig: {fileID: 11400000, guid: ef61123a12fb3f449a8cc6acd6cb0300, type: 2}
   inputProviderComponent: {fileID: 4353960470142912781}
   playerCamera: {fileID: 3566164332094806941}
-  standingHeight: 2
-  controllerRadius: 0.5
   groundCheckDistance: 0.2
 --- !u!114 &5118260639446031453
 MonoBehaviour:

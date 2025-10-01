@@ -3,12 +3,11 @@ using System;
 
 /// <summary>
 /// Mobile swipe look provider: tracks one touch and returns pixel delta since last frame.
-/// Attach this to a scene object (e.g. Input/Providers) and reference it in CameraController.
 /// </summary>
 [DisallowMultipleComponent]
 public class MobileSwipeLook : MonoBehaviour, ILookInputProvider
 {
-    [SerializeField] private LookConfig lookConfig; // optional, used only to decide right-half logic; provider remains pure input
+    [SerializeField] private LookConfig lookConfig;
     private LookInputState _state;
 
     // internal tracking
