@@ -305,6 +305,42 @@ public class IntegrateWeaponWindow : EditorWindow
                             compSo.ApplyModifiedProperties();
                         }
                     }
+
+                    // Assign object pool reference to the weapon component if there is a matching field
+                    var poolRefGO = FindChildByName(root.transform, pending.poolObjectName);
+                    if (poolRefGO != null)
+                    {
+                        // Try to get ObjectPool component if it exists
+                        var objectPoolType = GetTypeByNameStatic("ObjectPool");
+                        Component poolComp = objectPoolType != null ? poolRefGO.GetComponent(objectPoolType) : null;
+
+                        // Try common property names for different expected types
+                        SerializedProperty poolProp =
+                            compSo.FindProperty("projectilePool") ??
+                            compSo.FindProperty("pool") ??
+                            compSo.FindProperty("bulletPool") ??
+                            compSo.FindProperty("objectPoolGO") ??
+                            compSo.FindProperty("poolGO") ??
+                            compSo.FindProperty("poolTransform") ??
+                            compSo.FindProperty("objectPoolTransform");
+
+                        if (poolProp != null)
+                        {
+                            // Prefer assigning the component if available, otherwise the GameObject, otherwise the Transform
+                            UnityEngine.Object assignObj = null;
+                            if (poolComp != null)
+                                assignObj = (UnityEngine.Object)poolComp;
+                            else
+                                assignObj = (UnityEngine.Object)poolRefGO;
+
+                            // If field seems to be a Transform, assign transform
+                            if (poolProp.propertyPath.ToLower().Contains("transform"))
+                                assignObj = poolRefGO.transform;
+
+                            poolProp.objectReferenceValue = assignObj;
+                            compSo.ApplyModifiedProperties();
+                        }
+                    }
                 }
             }
 
