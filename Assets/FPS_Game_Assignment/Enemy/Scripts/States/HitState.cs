@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class HitState : IState
@@ -6,6 +7,7 @@ public class HitState : IState
     private float _remaining;
     private float _defaultRecovery;
     private bool _isActive;
+    private IState _nextState; // usually chase
 
     public HitState(IEnemyContext context)
     {
@@ -18,7 +20,10 @@ public class HitState : IState
     {
         _remaining = recoverySeconds > 0f ? recoverySeconds : _defaultRecovery;
     }
-
+    public void SetNextState(IState next)
+    {
+        _nextState = next;
+    }
     public void Enter()
     {
         _isActive = true;
