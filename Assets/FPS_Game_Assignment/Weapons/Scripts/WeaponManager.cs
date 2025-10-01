@@ -1,4 +1,3 @@
-// WeaponManager.cs
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,6 +11,7 @@ public class WeaponManager : MonoBehaviour
     [Tooltip("Weapon holder transform (child of camera/player).")]
     public Transform weaponHolder;
 
+    [Tooltip("SO that holds the reference of all weapons prefabs")]
     [SerializeField] Weapons weapon;
 
     private GameObject[] weaponPrefabs;
