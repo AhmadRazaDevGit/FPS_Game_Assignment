@@ -3767,6 +3767,16 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5720591023282694244}
     m_Modifications:
+    - target: {fileID: 948483855268643323, guid: 4181e8bc0778c2f4892aff6740500e7e,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 98.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 948483855268643323, guid: 4181e8bc0778c2f4892aff6740500e7e,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 25.69
+      objectReference: {fileID: 0}
     - target: {fileID: 1485191837544792193, guid: 4181e8bc0778c2f4892aff6740500e7e,
         type: 3}
       propertyPath: m_Layer
@@ -3900,12 +3910,12 @@ PrefabInstance:
     - target: {fileID: 7808508535888257205, guid: 4181e8bc0778c2f4892aff6740500e7e,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 377.9697
+      value: 283.0777
       objectReference: {fileID: 0}
     - target: {fileID: 7808508535888257205, guid: 4181e8bc0778c2f4892aff6740500e7e,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 50.396
+      value: 37.7437
       objectReference: {fileID: 0}
     - target: {fileID: 7808508535888257205, guid: 4181e8bc0778c2f4892aff6740500e7e,
         type: 3}
