@@ -23,8 +23,6 @@ public class WeaponData : ScriptableObject
     public FireMode fireMode = FireMode.SemiAuto;
     [Tooltip("Rounds per minute / fire rate.")]
     public float roundsPerMinute = 400f;
-    [Tooltip("For burst mode, how many shots in a burst.")]
-    public int burstCount = 3;
     [Tooltip("Spread in degrees (cone half-angle).")]
     public float spreadAngle = 1.2f;
 
