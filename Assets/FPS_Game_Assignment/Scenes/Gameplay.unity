@@ -138,7 +138,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 177638, guid: 0abab5bb77339e4428787a870eb31bd3, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22451668, guid: 0abab5bb77339e4428787a870eb31bd3, type: 3}
       propertyPath: m_Pivot.x
@@ -504,6 +504,12 @@ MonoBehaviour:
   enemiesPrefab: {fileID: 11400000, guid: 96e0754f7c3ca7e42911888f5703dff7, type: 2}
   spawnOnStart: 1
   delayBetweenSpawns: 4
+  wayPoints:
+  - {fileID: 1412113361}
+  - {fileID: 1163821557}
+  - {fileID: 1902541291}
+  - {fileID: 584611593}
+  - {fileID: 601249362}
 --- !u!4 &1216521363
 Transform:
   m_ObjectHideFlags: 0

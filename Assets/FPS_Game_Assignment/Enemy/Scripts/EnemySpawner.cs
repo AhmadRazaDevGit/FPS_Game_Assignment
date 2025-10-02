@@ -13,6 +13,7 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("Delay (seconds) between each spawn. 0 = spawn instantly, one after another.")]
     [SerializeField] private float delayBetweenSpawns = 0f;
 
+    public Transform[] wayPoints;
     private void Start()
     {
         if (spawnOnStart)
@@ -56,14 +57,16 @@ public class EnemySpawner : MonoBehaviour
 
             if (wait != null)
                 yield return wait;
-            
+
         }
     }
 
     private GameObject SpawnOne(GameObject prefab)
     {
-        
-        return Instantiate(prefab, transform.position, transform.rotation, transform);
+        GameObject enemy = Instantiate(prefab, transform.position, transform.rotation, transform);
+        enemy.GetComponent<BaseEnemy>().AssignWayPoints(wayPoints);
+        enemy.SetActive(true);
+        return enemy;
     }
 
     public void SpawnPrefab(GameObject prefab, int amount)
@@ -71,5 +74,13 @@ public class EnemySpawner : MonoBehaviour
         if (prefab == null) return;
         int safeAmount = Mathf.Max(0, amount);
         for (int i = 0; i < safeAmount; i++) SpawnOne(prefab);
+    }
+
+    [ContextMenu("FindWayPoints")]
+    public void FindWayPoints()
+    {
+        WayPoint waypoint = FindObjectOfType<WayPoint>();
+        wayPoints = waypoint.wayPoints;
+        if (wayPoints == null) Debug.LogError("Could not found waypoints");
     }
 }
