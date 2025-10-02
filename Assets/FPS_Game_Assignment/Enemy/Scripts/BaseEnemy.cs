@@ -61,6 +61,9 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext, IWayPointAssignable
         if (sensor != null)
         {
             sensor.OnDetected += HandleTargetDetected;
+        }
+        if (enemyHealth != null)
+        {
             enemyHealth.OnEnemyDeath += GoToDieState;
         }
     }
@@ -70,13 +73,19 @@ public class BaseEnemy : MonoBehaviour, IEnemyContext, IWayPointAssignable
         if (sensor != null)
         {
             sensor.OnDetected -= HandleTargetDetected;
+        }
+        if (enemyHealth != null)
+        {
             enemyHealth.OnEnemyDeath -= GoToDieState;
         }
     }
 
     protected virtual void Start()
     {
-        sensor.ConfigureRadius(enemyData.detectionRadius);
+        if (sensor != null && enemyData != null)
+        {
+            sensor.ConfigureRadius(enemyData.detectionRadius);
+        }
         // start in Idle state
         StateMachine.ChangeState(_idleState);
     }
