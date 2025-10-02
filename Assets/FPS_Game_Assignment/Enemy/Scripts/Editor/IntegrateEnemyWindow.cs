@@ -1,4 +1,3 @@
-// Place this file in an Editor folder, e.g. Assets/Editor/IntegrateEnemyWindow.cs
 using System;
 using System.IO;
 using System.Linq;
@@ -7,7 +6,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Animations; // <- runtime AnimatorOverrideController lives here
+using UnityEngine.Animations; 
 using UnityEngine.SceneManagement;
 
 public class IntegrateEnemyWindow : EditorWindow
@@ -18,10 +17,10 @@ public class IntegrateEnemyWindow : EditorWindow
     
     private const string sessionKey = "IntegrateEnemyWindow.Pending";
     
-    // Keep minimal pending info to finish after assembly reload (also persisted via SessionState)
+
     private static PendingIntegration pending;
 
-    // Paths used by the tool (change if your project structure differs)
+
     private const string BaseFolder = "Assets/FPS_Game_Assignment/Enemy";
     private const string AnimatorsFolder = BaseFolder + "/Animators";
     private const string ScriptsFolder = BaseFolder + "/Scripts";
@@ -52,7 +51,7 @@ public class IntegrateEnemyWindow : EditorWindow
         fbxObject = EditorGUILayout.ObjectField(fbxObject, typeof(UnityEngine.Object), false);
         if (EditorGUI.EndChangeCheck())
         {
-            // nothing special
+           
         }
         EditorGUILayout.EndHorizontal();
 
@@ -62,7 +61,7 @@ public class IntegrateEnemyWindow : EditorWindow
         GUILayout.FlexibleSpace();
         if (GUILayout.Button("Integrate", GUILayout.Width(140), GUILayout.Height(28)))
         {
-            // run integration
+            
             if (fbxObject == null)
             {
                 EditorUtility.DisplayDialog("Integrate Enemy", "Please assign an FBX model/prefab in the field.", "OK");
@@ -124,42 +123,42 @@ public class IntegrateEnemyWindow : EditorWindow
         var cleaned = new string(input.Where(c => !invalid.Contains(c)).ToArray());
         cleaned = cleaned.Replace(" ", "_");
         if (string.IsNullOrEmpty(cleaned)) cleaned = "Enemy";
-        // C# class names cannot start with digit
+        
         if (char.IsDigit(cleaned[0])) cleaned = "_" + cleaned;
         return cleaned;
     }
 
     private void IntegrateEnemy(UnityEngine.Object fbxObj)
     {
-        // Ensure output folders exist
+        
         EnsureFolder(AnimatorsFolder);
         EnsureFolder(ScriptsFolder);
         EnsureFolder(SOFolder);
 
-        // Determine name
+        
         string rawName = fbxObj.name;
         string enemyName = SanitizeName(rawName);
 
-        // Create root GameObject
+        
         GameObject root = new GameObject(enemyName);
         Undo.RegisterCreatedObjectUndo(root, "Create Enemy Root");
 
-        // Add CapsuleCollider - default values
+        
         var capsule = Undo.AddComponent<CapsuleCollider>(root);
         capsule.center = Vector3.zero;
         capsule.radius = 0.5f;
         capsule.height = 2f;
 
-        // Animator + controller asset (use runtime AnimatorOverrideController)
+        
         var overrideController = new AnimatorOverrideController();
         string animatorAssetPath = $"{AnimatorsFolder}/{enemyName}_Override.controller";
         AssetDatabase.CreateAsset(overrideController, animatorAssetPath);
         AssetDatabase.SaveAssets();
 
         var animator = Undo.AddComponent<Animator>(root);
-        //animator.runtimeAnimatorController = overrideController;
+      
 
-        // Try to assign avatar from the FBX (if present).
+        
         Avatar avatar = null;
         if (AssetDatabase.Contains(fbxObj))
         {
@@ -172,15 +171,15 @@ public class IntegrateEnemyWindow : EditorWindow
             animator.avatar = avatar;
         }
 
-        // NavMeshAgent
+        
         var agent = Undo.AddComponent<NavMeshAgent>(root);
 
-        // Rigidbody with freeze constraints
+        
         var rb = Undo.AddComponent<Rigidbody>(root);
         rb.constraints = RigidbodyConstraints.FreezeAll;
         rb.isKinematic = false;
 
-        // Create script file inheriting BaseEnemy
+        
         string className = enemyName;
         string scriptPath = $"{ScriptsFolder}/{className}.cs";
         if (!File.Exists(scriptPath))
@@ -199,7 +198,7 @@ public class {className} : BaseEnemy
             Debug.Log($"Script already exists: {scriptPath} (will reuse)");
         }
 
-        // Create EnemyData ScriptableObject asset
+       
         Type enemyDataType = FindTypeByName("EnemyData");
         UnityEngine.Object enemyDataAsset = null;
         if (enemyDataType != null && enemyDataType.IsSubclassOf(typeof(ScriptableObject)))
@@ -215,14 +214,14 @@ public class {className} : BaseEnemy
             Debug.LogWarning("EnemyData ScriptableObject type not found - cannot create asset.");
         }
 
-        // Create Detection child and attach EnemySensor
+        
         GameObject detectionGO = new GameObject("Detection");
         Undo.RegisterCreatedObjectUndo(detectionGO, "Create Detection");
         detectionGO.transform.SetParent(root.transform, false);
         var sphere = Undo.AddComponent<SphereCollider>(detectionGO);
         sphere.isTrigger = true;
         sphere.center = Vector3.zero;
-        sphere.radius = 3f; // default radius
+        sphere.radius = 3f; 
 
         Type sensorType = FindTypeByName("EnemySensor");
         Component sensorComp = null;
@@ -230,7 +229,7 @@ public class {className} : BaseEnemy
         {
             sensorComp = Undo.AddComponent(detectionGO, sensorType);
 
-            // set first LayerMask field on sensor to layer "Player" if present
+            
             int playerLayer = LayerMask.NameToLayer("Player");
             if (playerLayer != -1)
             {
@@ -268,7 +267,7 @@ public class {className} : BaseEnemy
             Debug.LogWarning("EnemySensor type not found. Create the Detection child and attach EnemySensor manually.");
         }
 
-        // Attach EnemyHealth to root (object which has NavMeshAgent)
+        
         Type enemyHealthType = FindTypeByName("EnemyHealth");
         Component enemyHealthComp = null;
         if (enemyHealthType != null)
@@ -281,7 +280,7 @@ public class {className} : BaseEnemy
         }
 
 
-        // Instantiate EnemyCanvas prefab as child
+        
         GameObject enemyCanvasPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(EnemyCanvasPrefabPath);
         if (enemyCanvasPrefab != null)
         {
@@ -294,7 +293,7 @@ public class {className} : BaseEnemy
             Debug.LogWarning($"EnemyCanvas prefab not found at path '{EnemyCanvasPrefabPath}'.");
         }
 
-        // Put the provided FBX as child of root.
+     
         GameObject fbxSceneInstance = null;
         if (AssetDatabase.Contains(fbxObj))
         {
@@ -307,14 +306,14 @@ public class {className} : BaseEnemy
             }
             else
             {
-                // fallback: instantiate a generic object
+                
                 fbxSceneInstance = (GameObject)Instantiate(fbxObj);
                 Undo.RegisterCreatedObjectUndo(fbxSceneInstance, "Instantiate FBX (fallback)");
             }
         }
         else
         {
-            // user dragged a scene GameObject - just clone it
+            
             var go = fbxObj as GameObject;
             if (go != null)
             {
@@ -336,12 +335,11 @@ public class {className} : BaseEnemy
             Debug.LogWarning("Failed to instantiate or clone the FBX into the scene. Please add the visual model manually as a child of the created root.");
         }
 
-        // Save the scene and assets
+        
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        // Because we created a new script we need to wait for compilation before attaching it.
-        // Save a pending record so the post-compile step knows what to do.
+        
         var gid = UnityEditor.GlobalObjectId.GetGlobalObjectIdSlow(root);
         pending = new PendingIntegration
         {
@@ -351,14 +349,14 @@ public class {className} : BaseEnemy
             sensorName = "Detection",
             enemyCanvasPrefabPath = EnemyCanvasPrefabPath
         };
-        // Persist across domain reloads
+        
         SessionState.SetString(sessionKey, JsonUtility.ToJson(pending));
 
         statusMessage = $"Created files & scene objects. Waiting for compile to attach '{className}' to root.";
         Debug.Log(statusMessage);
     }
 
-    // Run after reloads to complete any pending integration
+    
     [InitializeOnLoadMethod]
     private static void AutoFinalizeAfterReload()
     {
@@ -367,7 +365,7 @@ public class {className} : BaseEnemy
 
     private static void TryFinalizePending()
     {
-        // Load from session first; fall back to static
+        
         var json = SessionState.GetString(sessionKey, string.Empty);
         if (!string.IsNullOrEmpty(json))
         {
@@ -378,7 +376,7 @@ public class {className} : BaseEnemy
 
         try
         {
-            // Resolve root GameObject via GlobalObjectId
+            
             GameObject root = null;
             if (!string.IsNullOrEmpty(pending.rootGlobalId) && UnityEditor.GlobalObjectId.TryParse(pending.rootGlobalId, out var gid))
             {
@@ -393,7 +391,7 @@ public class {className} : BaseEnemy
                 return;
             }
 
-            // 1) Attach the created script (type by name)
+            
             Type scriptType = FindTypeByName(pending.scriptClassName);
             if (scriptType != null)
             {
@@ -408,7 +406,7 @@ public class {className} : BaseEnemy
                 Debug.LogError($"Script type '{pending.scriptClassName}' not found after compilation. Check for compile errors.");
             }
 
-            // 2) Assign the EnemyData SO into a field on the script
+          
             if (!string.IsNullOrEmpty(pending.soAssetPath))
             {
                 UnityEngine.Object soObj = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(pending.soAssetPath);
@@ -425,7 +423,7 @@ public class {className} : BaseEnemy
                             compSo.ApplyModifiedProperties();
                         }
 
-                        // Assign sensor reference if a field exists
+                       
                         var sensorObj = FindChildByName(root.transform, pending.sensorName);
                         if (sensorObj != null)
                         {
@@ -438,7 +436,7 @@ public class {className} : BaseEnemy
                             }
                         }
 
-                        // Assign enemy health reference if a field exists
+                        
                         var healthComp = root.GetComponent(FindTypeByName("EnemyHealth"));
                         if (healthComp != null)
                         {
@@ -457,7 +455,7 @@ public class {className} : BaseEnemy
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             AssetDatabase.SaveAssets();
 
-            // Clear pending (both memory and session)
+            
             pending = null;
             SessionState.EraseString(sessionKey);
             Debug.Log("Enemy integration finalization complete.");

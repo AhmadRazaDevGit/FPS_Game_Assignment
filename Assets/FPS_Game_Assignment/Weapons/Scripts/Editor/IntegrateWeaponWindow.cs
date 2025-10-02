@@ -1,4 +1,4 @@
-// Place this file in an "Editor" folder: Assets/Editor/IntegrateWeaponWindow.cs
+
 using System;
 using System.IO;
 using System.Linq;
@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 
 public class IntegrateWeaponWindow : EditorWindow
 {
-    private UnityEngine.Object weaponAsset; // fbx or prefab
+    private UnityEngine.Object weaponAsset; 
     private GUIContent weaponFieldLabel = new GUIContent("Weapon FBX/Prefab", "Drag the FBX or prefab for the weapon here.");
     private string statusMessage = "";
 
@@ -20,7 +20,6 @@ public class IntegrateWeaponWindow : EditorWindow
     private const string bulletsPath = "Assets/FPS_Game_Assignment/Weapons/Prefabs/Bullets/RifleBullet.prefab";
     private const string sessionKey = "IntegrateWeaponWindow.Pending";
 
-    // Keep minimal pending info to finish after assembly reload (also persisted via SessionState)
     private static PendingIntegration pending;
 
     [MenuItem("FPSGame/Integrate Weapon")]
@@ -83,13 +82,13 @@ public class IntegrateWeaponWindow : EditorWindow
             return;
         }
 
-        // Ensure directories exist
+    
         EnsureFolderExists("Assets/FPS_Game_Assignment");
         EnsureFolderExists("Assets/FPS_Game_Assignment/Weapons");
         EnsureFolderExists(scriptsFolder);
         EnsureFolderExists(soFolder);
 
-        // 1) Create script file
+     
         string scriptPath = $"{scriptsFolder}/{baseName}.cs";
         if (!File.Exists(scriptPath))
         {
@@ -102,12 +101,12 @@ public class IntegrateWeaponWindow : EditorWindow
             Debug.Log($"Script already exists: {scriptPath} (will reuse)");
         }
 
-        // 2) Create ScriptableObject WeaponData
+       
         string soPath = $"{soFolder}/{baseName}.asset";
         UnityEngine.Object soInstance = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(soPath);
         if (soInstance == null)
         {
-            // Try to create instance of WeaponData by type-name (works if WeaponData type exists)
+            
             UnityEngine.Object newSo = null;
             Type weaponDataType = GetTypeByName("WeaponData");
             if (weaponDataType != null && weaponDataType.IsSubclassOf(typeof(ScriptableObject)))
@@ -119,9 +118,7 @@ public class IntegrateWeaponWindow : EditorWindow
             }
             else
             {
-                // If type isn't available yet, create a generic placeholder ScriptableObject asset that will be replaced later.
-                // We'll create a plain ScriptableObject asset of unknown type that can't store specific fields,
-                // but we nonetheless create the file so the path exists. The real WeaponData will be available after compile.
+                
                 ScriptableObject placeholder = ScriptableObject.CreateInstance<ScriptableObject>();
                 AssetDatabase.CreateAsset(placeholder, soPath);
                 AssetDatabase.SaveAssets();
@@ -133,15 +130,15 @@ public class IntegrateWeaponWindow : EditorWindow
             Debug.Log($"WeaponData asset already exists: {soPath} (will reuse)");
         }
 
-        // 3) Create root GameObject in scene + instantiate model prefab as child (prefab is not added to scene yet)
+
         string rootName = baseName;
         GameObject rootGO = new GameObject(rootName);
         Undo.RegisterCreatedObjectUndo(rootGO, "Create Weapon Root");
 
-        // If playmode or not, mark scene dirty
+ 
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
 
-        // instantiate the selected FBX/prefab as a child of root
+     
         UnityEngine.Object instantiated = null;
         try
         {
@@ -157,7 +154,7 @@ public class IntegrateWeaponWindow : EditorWindow
         }
         catch (Exception)
         {
-            // fallback: try AssetDatabase.LoadAssetAtPath<GameObject> and Instantiate
+            
             var go = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
             if (go != null)
             {
@@ -171,11 +168,11 @@ public class IntegrateWeaponWindow : EditorWindow
             }
         }
 
-        // 4) Create MuzzleEffect child
+       
         GameObject muzzle = new GameObject("MuzzleEffect");
         muzzle.transform.SetParent(rootGO.transform, false);
 
-        // 5) Create Object Pool child and add ObjectPool component (if type exists)
+       
         GameObject poolGO = new GameObject("Object Pool");
         poolGO.transform.SetParent(rootGO.transform, false);
         Component poolComp = null;
@@ -189,7 +186,7 @@ public class IntegrateWeaponWindow : EditorWindow
             Debug.LogWarning("ObjectPool type not found in project. Object Pool GameObject created; add ObjectPool component later.");
         }
 
-        // Attempt to assign RifleBullet prefab into 'prefab' field on poolComp
+        
         GameObject bulletPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(bulletsPath);
         if (poolComp != null)
         {
@@ -207,12 +204,11 @@ public class IntegrateWeaponWindow : EditorWindow
             }
         }
 
-        // Save the scene and assets
+        
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        // Because we created a new script we need to wait for compilation before attaching it.
-        // Save a pending record so the post-compile step knows what to do.
+        
         var gid = UnityEditor.GlobalObjectId.GetGlobalObjectIdSlow(rootGO);
         pending = new PendingIntegration
         {
@@ -223,14 +219,14 @@ public class IntegrateWeaponWindow : EditorWindow
             bulletPrefabPath = bulletsPath,
             poolObjectName = "Object Pool"
         };
-        // Persist across domain reloads
+        
         SessionState.SetString(sessionKey, JsonUtility.ToJson(pending));
 
         statusMessage = $"Created files & scene objects. Waiting for compile to attach '{baseName}' to root.";
         Debug.Log(statusMessage);
     }
 
-    // Run after reloads to complete any pending integration
+    
     [InitializeOnLoadMethod]
     private static void AutoFinalizeAfterReload()
     {
@@ -239,7 +235,7 @@ public class IntegrateWeaponWindow : EditorWindow
 
     private static void TryFinalizePending()
     {
-        // Load from session first; fall back to static
+        
         var json = SessionState.GetString(sessionKey, string.Empty);
         if (!string.IsNullOrEmpty(json))
         {
@@ -250,7 +246,7 @@ public class IntegrateWeaponWindow : EditorWindow
 
         try
         {
-            // Resolve root GameObject via GlobalObjectId
+            
             GameObject root = null;
             if (!string.IsNullOrEmpty(pending.rootGlobalId) && UnityEditor.GlobalObjectId.TryParse(pending.rootGlobalId, out var gid))
             {
@@ -265,7 +261,7 @@ public class IntegrateWeaponWindow : EditorWindow
                 return;
             }
 
-            // 1) Attach the created script (type by name)
+            
             Type scriptType = GetTypeByNameStatic(pending.scriptClassName);
             if (scriptType != null)
             {
@@ -280,7 +276,7 @@ public class IntegrateWeaponWindow : EditorWindow
                 Debug.LogError($"Script type '{pending.scriptClassName}' not found after compilation. Check for compile errors.");
             }
 
-            // 2) Assign the WeaponData SO into a field on the script or a common field name
+            
             UnityEngine.Object soObj = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(pending.soAssetPath);
             if (soObj != null && scriptType != null)
             {
@@ -294,7 +290,7 @@ public class IntegrateWeaponWindow : EditorWindow
                         soProp.objectReferenceValue = soObj;
                         compSo.ApplyModifiedProperties();
                     }
-                    // Assign muzzleTransform if a field exists
+                  
                     var muzzleObj = FindChildByName(root.transform, pending.muzzleName);
                     if (muzzleObj != null)
                     {
@@ -306,15 +302,15 @@ public class IntegrateWeaponWindow : EditorWindow
                         }
                     }
 
-                    // Assign object pool reference to the weapon component if there is a matching field
+                   
                     var poolRefGO = FindChildByName(root.transform, pending.poolObjectName);
                     if (poolRefGO != null)
                     {
-                        // Try to get ObjectPool component if it exists
+                        
                         var objectPoolType = GetTypeByNameStatic("ObjectPool");
                         Component poolComp = objectPoolType != null ? poolRefGO.GetComponent(objectPoolType) : null;
 
-                        // Try common property names for different expected types
+                      
                         SerializedProperty poolProp =
                             compSo.FindProperty("projectilePool") ??
                             compSo.FindProperty("pool") ??
@@ -326,14 +322,14 @@ public class IntegrateWeaponWindow : EditorWindow
 
                         if (poolProp != null)
                         {
-                            // Prefer assigning the component if available, otherwise the GameObject, otherwise the Transform
+                         
                             UnityEngine.Object assignObj = null;
                             if (poolComp != null)
                                 assignObj = (UnityEngine.Object)poolComp;
                             else
                                 assignObj = (UnityEngine.Object)poolRefGO;
 
-                            // If field seems to be a Transform, assign transform
+                           
                             if (poolProp.propertyPath.ToLower().Contains("transform"))
                                 assignObj = poolRefGO.transform;
 
@@ -344,7 +340,7 @@ public class IntegrateWeaponWindow : EditorWindow
                 }
             }
 
-            // 3) Assign bullet prefab to pool if possible
+            
             GameObject poolGO = FindChildByName(root.transform, pending.poolObjectName);
             if (poolGO != null)
             {
@@ -366,7 +362,7 @@ public class IntegrateWeaponWindow : EditorWindow
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
             AssetDatabase.SaveAssets();
 
-            // Clear pending (both memory and session)
+            
             pending = null;
             SessionState.EraseString(sessionKey);
             Debug.Log("Weapon integration finalization complete.");
@@ -403,7 +399,7 @@ public class IntegrateWeaponWindow : EditorWindow
 
     private string GenerateWeaponScriptCode(string className)
     {
-        // This is intentionally minimal; edit the content as needed (namespaces, usings).
+
         return
 $@"using UnityEngine;
 
@@ -422,7 +418,7 @@ public class {className} : WeaponBase
 
     private static Type GetTypeByName(string typeName)
     {
-        // Try to find type in loaded assemblies
+       
         foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
         {
             try
@@ -430,13 +426,13 @@ public class {className} : WeaponBase
                 var t = asm.GetType(typeName);
                 if (t != null) return t;
 
-                // also search types by name
+                
                 var found = asm.GetTypes().FirstOrDefault(x => x.Name == typeName);
                 if (found != null) return found;
             }
             catch
             {
-                // some assemblies may throw on GetTypes(); ignore
+               
             }
         }
         return null;
