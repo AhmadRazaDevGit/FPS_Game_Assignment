@@ -8,11 +8,18 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Animations; // <- runtime AnimatorOverrideController lives here
+using UnityEngine.SceneManagement;
 
 public class IntegrateEnemyWindow : EditorWindow
 {
     private UnityEngine.Object fbxObject;
     private Vector2 scroll;
+    private string statusMessage = "";
+    
+    private const string sessionKey = "IntegrateEnemyWindow.Pending";
+    
+    // Keep minimal pending info to finish after assembly reload (also persisted via SessionState)
+    private static PendingIntegration pending;
 
     // Paths used by the tool (change if your project structure differs)
     private const string BaseFolder = "Assets/FPS_Game_Assignment/Enemy";
@@ -75,6 +82,10 @@ public class IntegrateEnemyWindow : EditorWindow
         }
         GUILayout.FlexibleSpace();
         EditorGUILayout.EndHorizontal();
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Status:", EditorStyles.boldLabel);
+        EditorGUILayout.HelpBox(statusMessage, MessageType.None);
 
         GUILayout.Space(10);
         EditorGUILayout.LabelField("Notes:", EditorStyles.miniLabel);
@@ -181,25 +192,11 @@ public class {className} : BaseEnemy
     // Auto-generated enemy class. Add behavior overrides here if needed.
 }}";
             File.WriteAllText(scriptPath, scriptTemplate);
-            AssetDatabase.ImportAsset(scriptPath);
-            AssetDatabase.Refresh();
-        }
-
-        // Add the generated enemy script as component (if the type exists after import)
-        Type enemyType = FindTypeByName(className);
-        Component enemyComponent = null;
-        if (enemyType != null && enemyType.IsSubclassOf(typeof(MonoBehaviour)))
-        {
-            enemyComponent = Undo.AddComponent(root, enemyType);
+            Debug.Log($"Created script: {scriptPath}");
         }
         else
         {
-            // fallback: try to add BaseEnemy
-            Type baseEnemyType = FindTypeByName("BaseEnemy");
-            if (baseEnemyType != null)
-                enemyComponent = Undo.AddComponent(root, baseEnemyType);
-            else
-                Debug.LogWarning("Could not find generated enemy type or BaseEnemy type to attach. You will need to attach manually.");
+            Debug.Log($"Script already exists: {scriptPath} (will reuse)");
         }
 
         // Create EnemyData ScriptableObject asset
@@ -283,27 +280,6 @@ public class {className} : BaseEnemy
             Debug.LogWarning("EnemyHealth type not found - please attach it manually.");
         }
 
-        // Wire references on the enemy component: enemyData, sensor, enemyHealth (use SerializedObject)
-        if (enemyComponent != null)
-        {
-            var so = new SerializedObject((UnityEngine.Object)enemyComponent);
-            var propEnemyData = so.FindProperty("enemyData");
-            if (propEnemyData != null && enemyDataAsset != null)
-            {
-                propEnemyData.objectReferenceValue = enemyDataAsset;
-            }
-            var propSensor = so.FindProperty("sensor");
-            if (propSensor != null && sensorComp != null)
-            {
-                propSensor.objectReferenceValue = (UnityEngine.Object)sensorComp;
-            }
-            var propEnemyHealth = so.FindProperty("enemyHealth");
-            if (propEnemyHealth != null && enemyHealthComp != null)
-            {
-                propEnemyHealth.objectReferenceValue = (UnityEngine.Object)enemyHealthComp;
-            }
-            so.ApplyModifiedProperties();
-        }
 
         // Instantiate EnemyCanvas prefab as child
         GameObject enemyCanvasPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(EnemyCanvasPrefabPath);
@@ -360,11 +336,157 @@ public class {className} : BaseEnemy
             Debug.LogWarning("Failed to instantiate or clone the FBX into the scene. Please add the visual model manually as a child of the created root.");
         }
 
-        // Select the created root in the editor and mark scene dirty
-        Selection.activeGameObject = root;
-        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        // Save the scene and assets
         AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
 
-        Debug.Log($"Enemy '{enemyName}' integrated successfully.");
+        // Because we created a new script we need to wait for compilation before attaching it.
+        // Save a pending record so the post-compile step knows what to do.
+        var gid = UnityEditor.GlobalObjectId.GetGlobalObjectIdSlow(root);
+        pending = new PendingIntegration
+        {
+            scriptClassName = className,
+            rootGlobalId = gid.ToString(),
+            soAssetPath = enemyDataAsset != null ? AssetDatabase.GetAssetPath(enemyDataAsset) : "",
+            sensorName = "Detection",
+            enemyCanvasPrefabPath = EnemyCanvasPrefabPath
+        };
+        // Persist across domain reloads
+        SessionState.SetString(sessionKey, JsonUtility.ToJson(pending));
+
+        statusMessage = $"Created files & scene objects. Waiting for compile to attach '{className}' to root.";
+        Debug.Log(statusMessage);
+    }
+
+    // Run after reloads to complete any pending integration
+    [InitializeOnLoadMethod]
+    private static void AutoFinalizeAfterReload()
+    {
+        TryFinalizePending();
+    }
+
+    private static void TryFinalizePending()
+    {
+        // Load from session first; fall back to static
+        var json = SessionState.GetString(sessionKey, string.Empty);
+        if (!string.IsNullOrEmpty(json))
+        {
+            pending = JsonUtility.FromJson<PendingIntegration>(json);
+        }
+        if (pending == null)
+            return;
+
+        try
+        {
+            // Resolve root GameObject via GlobalObjectId
+            GameObject root = null;
+            if (!string.IsNullOrEmpty(pending.rootGlobalId) && UnityEditor.GlobalObjectId.TryParse(pending.rootGlobalId, out var gid))
+            {
+                var obj = UnityEditor.GlobalObjectId.GlobalObjectIdentifierToObjectSlow(gid);
+                root = obj as GameObject;
+            }
+            if (root == null)
+            {
+                Debug.LogError("Pending enemy integration failed: could not locate the created root GameObject.");
+                pending = null;
+                SessionState.EraseString(sessionKey);
+                return;
+            }
+
+            // 1) Attach the created script (type by name)
+            Type scriptType = FindTypeByName(pending.scriptClassName);
+            if (scriptType != null)
+            {
+                if (root.GetComponent(scriptType) == null)
+                {
+                    Undo.AddComponent(root, scriptType);
+                    Debug.Log($"Added component {pending.scriptClassName} to {root.name}");
+                }
+            }
+            else
+            {
+                Debug.LogError($"Script type '{pending.scriptClassName}' not found after compilation. Check for compile errors.");
+            }
+
+            // 2) Assign the EnemyData SO into a field on the script
+            if (!string.IsNullOrEmpty(pending.soAssetPath))
+            {
+                UnityEngine.Object soObj = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(pending.soAssetPath);
+                if (soObj != null && scriptType != null)
+                {
+                    Component comp = root.GetComponent(scriptType);
+                    if (comp != null)
+                    {
+                        SerializedObject compSo = new SerializedObject(comp);
+                        var soProp = compSo.FindProperty("enemyData");
+                        if (soProp != null)
+                        {
+                            soProp.objectReferenceValue = soObj;
+                            compSo.ApplyModifiedProperties();
+                        }
+
+                        // Assign sensor reference if a field exists
+                        var sensorObj = FindChildByName(root.transform, pending.sensorName);
+                        if (sensorObj != null)
+                        {
+                            var sensorProp = compSo.FindProperty("sensor");
+                            if (sensorProp != null)
+                            {
+                                var sensorComp = sensorObj.GetComponent(FindTypeByName("EnemySensor"));
+                                sensorProp.objectReferenceValue = sensorComp;
+                                compSo.ApplyModifiedProperties();
+                            }
+                        }
+
+                        // Assign enemy health reference if a field exists
+                        var healthComp = root.GetComponent(FindTypeByName("EnemyHealth"));
+                        if (healthComp != null)
+                        {
+                            var healthProp = compSo.FindProperty("enemyHealth");
+                            if (healthProp != null)
+                            {
+                                healthProp.objectReferenceValue = healthComp;
+                                compSo.ApplyModifiedProperties();
+                            }
+                        }
+                    }
+                }
+            }
+
+            Selection.activeGameObject = root;
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+            AssetDatabase.SaveAssets();
+
+            // Clear pending (both memory and session)
+            pending = null;
+            SessionState.EraseString(sessionKey);
+            Debug.Log("Enemy integration finalization complete.");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogException(ex);
+            pending = null;
+            SessionState.EraseString(sessionKey);
+        }
+    }
+
+    private static GameObject FindChildByName(Transform parent, string childName)
+    {
+        foreach (Transform t in parent.GetComponentsInChildren<Transform>(true))
+        {
+            if (t.name == childName)
+                return t.gameObject;
+        }
+        return null;
+    }
+
+    [System.Serializable]
+    private class PendingIntegration
+    {
+        public string scriptClassName;
+        public string rootGlobalId;
+        public string soAssetPath;
+        public string sensorName;
+        public string enemyCanvasPrefabPath;
     }
 }
