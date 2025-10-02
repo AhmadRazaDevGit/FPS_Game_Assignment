@@ -14,6 +14,17 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float delayBetweenSpawns = 0f;
 
     public Transform[] wayPoints;
+
+    [Tooltip("Enemy Factory Refrence")]
+    public EnemyFactory factory;
+
+    private IEnemyFactory _factoryInterface;
+
+    private void Awake()
+    {
+        _factoryInterface = factory as IEnemyFactory;
+    }
+
     private void Start()
     {
         if (spawnOnStart)
@@ -63,8 +74,13 @@ public class EnemySpawner : MonoBehaviour
 
     private GameObject SpawnOne(GameObject prefab)
     {
+        if (_factoryInterface != null)
+        {
+            return _factoryInterface.Create(prefab, transform.position, transform.rotation, null, wayPoints);
+        }
         GameObject enemy = Instantiate(prefab, transform.position, transform.rotation, transform);
-        enemy.GetComponent<BaseEnemy>().AssignWayPoints(wayPoints);
+        var assignable = enemy.GetComponent<IWayPointAssignable>();
+        if (assignable != null) assignable.AssignWayPoints(wayPoints);
         enemy.SetActive(true);
         return enemy;
     }

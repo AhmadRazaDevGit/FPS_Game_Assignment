@@ -3,7 +3,7 @@ using UnityEngine.AI;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(NavMeshAgent))]
-public class BaseEnemy : MonoBehaviour, IEnemyContext
+public class BaseEnemy : MonoBehaviour, IEnemyContext, IWayPointAssignable
 {
     [Header("Enemy Data")]
     [Tooltip("SO for this enemy (properties speed, animations, idle delay, etc.)")]
