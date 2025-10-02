@@ -123,3 +123,4 @@ These are not included in runtime builds.
 - Follow existing patterns: SO-driven config, interface-based inputs, event channels for decoupling.
 - Avoid allocations in hot paths (Updates). Prefer pooling for frequently spawned objects.
 - Mobile: keep physics layers tight and UI updates batched.
+
