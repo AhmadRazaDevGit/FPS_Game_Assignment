@@ -27,6 +27,7 @@ public class HealthUI : MonoBehaviour
     {
         if (healthFill == null)
             Debug.LogWarning("HealthUI: healthFill is not assigned.", this);
+        if (healthObject == null) healthObject = transform.root.gameObject;
         iHealth = healthObject.GetComponent<IHealth>();
         enemyHealth = healthObject.GetComponent<EnemyHealth>();
 
